@@ -75,19 +75,24 @@ final class CartTracker {
             $email = $user ? $user->user_email : '';
         }
 
-        $cart_for_session = $this->get_cart_for_storage();
-        if (empty($cart_for_session)) {
+        $filtered = $this->get_filtered_cart_for_storage();
+        if (empty($filtered['content'])) {
             return;
         }
 
-        $cart_total = (float) $cart->get_total('edit');
+        $cart_total = $filtered['total'];
+        $min_value = (float) $this->settings->get('min_cart_value', 0);
+        if ($min_value > 0 && $cart_total < $min_value) {
+            return;
+        }
+
         $currency = get_woocommerce_currency();
 
         $this->repository->upsert([
             'session_key'   => $session_key,
             'user_id'       => $user_id,
             'email'         => $email,
-            'cart_content'  => wp_json_encode($cart_for_session),
+            'cart_content'  => wp_json_encode($filtered['content']),
             'cart_total'    => $cart_total,
             'currency'      => $currency,
             'status'        => 'abandoned',
@@ -200,21 +205,70 @@ final class CartTracker {
     }
 
     /**
-     * Ottiene il carrello nel formato WC session (senza oggetto product).
+     * Ottiene il carrello filtrato (esclusioni) nel formato WC session.
      *
-     * @return array<string, array<string, mixed>>
+     * @return array{content: array<string, array<string, mixed>>, total: float}
      */
-    private function get_cart_for_storage(): array {
+    private function get_filtered_cart_for_storage(): array {
         if (!function_exists('WC') || !WC()->cart) {
-            return [];
+            return ['content' => [], 'total' => 0.0];
         }
 
+        $exclude_ids = $this->get_excluded_product_ids();
+        $exclude_cats = $this->get_excluded_category_ids();
         $cart_data = [];
+        $total = 0.0;
+
         foreach (WC()->cart->get_cart() as $key => $item) {
+            $product = $item['data'] ?? null;
+            if (!$product instanceof \WC_Product) {
+                continue;
+            }
+            $product_id = $product->get_id();
+            $variation_id = (int) ($item['variation_id'] ?? 0);
+            $id = $variation_id > 0 ? $variation_id : $product_id;
+
+            if (in_array($id, $exclude_ids, true) || in_array($product_id, $exclude_ids, true)) {
+                continue;
+            }
+            if (!empty($exclude_cats)) {
+                $terms = get_the_terms($product_id, 'product_cat');
+                if (is_array($terms)) {
+                    foreach ($terms as $term) {
+                        if ($term instanceof \WP_Term && in_array($term->term_id, $exclude_cats, true)) {
+                            continue 2; // skip this product
+                        }
+                    }
+                }
+            }
+
             $cart_data[$key] = $item;
             unset($cart_data[$key]['data']);
+            $total += (float) $product->get_price() * max(1, (int) ($item['quantity'] ?? 1));
         }
 
-        return $cart_data;
+        return ['content' => $cart_data, 'total' => $total];
+    }
+
+    /**
+     * @return array<int>
+     */
+    private function get_excluded_product_ids(): array {
+        $ids = $this->settings->get('exclude_product_ids', []);
+        if (!is_array($ids)) {
+            $ids = array_filter(array_map('absint', explode(',', (string) $ids)));
+        }
+        return array_map('absint', array_filter((array) $ids));
+    }
+
+    /**
+     * @return array<int>
+     */
+    private function get_excluded_category_ids(): array {
+        $ids = $this->settings->get('exclude_category_ids', []);
+        if (!is_array($ids)) {
+            $ids = array_filter(array_map('absint', explode(',', (string) $ids)));
+        }
+        return array_map('absint', array_filter((array) $ids));
     }
 }

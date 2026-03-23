@@ -55,6 +55,9 @@ defined('ABSPATH') || exit;
                         <p style="margin:0;color:#9ca3af;font-size:12px;text-align:center;">
                             {{shop_name}}
                         </p>
+                        <p style="margin:8px 0 0;color:#9ca3af;font-size:11px;text-align:center;">
+                            <a href="{{unsubscribe_url}}" style="color:#6b7280;"><?php echo esc_html__('Disiscriviti dalle email di recupero carrello', 'fp-cartrecovery'); ?></a>
+                        </p>
                     </td>
                 </tr>
             </table>

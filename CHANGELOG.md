@@ -1,9 +1,27 @@
 # Changelog
 
-## [1.1.2] - 2026-03-23
+## [1.2.0] - 2025-03-23
 
 ### Added
-- Notice in sezione email: se FP Mail SMTP è installato, avvisa che centralizza SMTP; altrimenti suggerisce FP Mail SMTP.
+
+- **Soglia minimo carrello** (`min_cart_value`): non inviare email se il totale è sotto la soglia
+- **Pulizia automatica** carrelli abbandonati più vecchi di X giorni (`cleanup_after_days`)
+- **Invio manuale** da dashboard: pulsante "Invia email" per singolo carrello
+- **Link unsubscribe** nelle email (`{{unsubscribe_url}}`) con verifica token HMAC
+- **Esclusione prodotti/categorie**: ID da escludere dal tracciamento
+- **Frequenza cron** configurabile (15min, 30min, hourly, twicedaily, daily)
+- **Export CSV** dalla dashboard
+- **Statistiche avanzate**: tasso conversione, filtro temporale (7/30/90 giorni)
+- **Terza email** reminder opzionale
+- **REST API**: `GET /fp-cart-recovery/v1/stats?days=30`
+- **Pagina Guida** nel menu con riepilogo placeholder e API
+- Pagina destinazione per unsubscribe configurabile
+
+### Changed
+
+- Cron `ensure_scheduled` supporta intervalli personalizzati
+- `AbandonedCartRepository::get_stats()` accetta parametro `days` per filtro temporale
+- `get_paginated()` accetta parametro `days` per filtro lista
 
 ## [1.1.1] - 2025-03-23
 

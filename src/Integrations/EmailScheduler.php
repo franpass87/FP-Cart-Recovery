@@ -21,23 +21,48 @@ final class EmailScheduler {
     ) {}
 
     public function register(): void {
+        add_filter('cron_schedules', [$this, 'add_cron_schedules']);
         add_action('admin_init', [$this, 'ensure_scheduled']);
         add_action(self::CRON_HOOK, [$this, 'send_reminders']);
+    }
+
+    /**
+     * Aggiunge intervalli cron personalizzati.
+     *
+     * @param array<string, array{interval: int, display: string}> $schedules
+     * @return array<string, array{interval: int, display: string}>
+     */
+    public function add_cron_schedules(array $schedules): array {
+        $schedules['fp_cartrecovery_15min'] = [
+            'interval' => 900,
+            'display'  => __('Ogni 15 minuti', 'fp-cartrecovery'),
+        ];
+        $schedules['fp_cartrecovery_30min'] = [
+            'interval' => 1800,
+            'display'  => __('Ogni 30 minuti', 'fp-cartrecovery'),
+        ];
+        return $schedules;
     }
 
     public function ensure_scheduled(): void {
         if (wp_next_scheduled(self::CRON_HOOK)) {
             return;
         }
-        wp_schedule_event(time() + 60, 'hourly', self::CRON_HOOK);
+        $interval = $this->settings->get('cron_interval', 'hourly');
+        $allowed = ['fp_cartrecovery_15min', 'fp_cartrecovery_30min', 'hourly', 'twicedaily', 'daily'];
+        $interval = in_array($interval, $allowed, true) ? $interval : 'hourly';
+        wp_schedule_event(time() + 60, $interval, self::CRON_HOOK);
     }
 
     public function send_reminders(): void {
         $abandon_min = max(0, (int) $this->settings->get('abandon_after_minutes', 30));
         $abandon_hours = $abandon_min / 60.0;
+        $min_cart_value = (float) $this->settings->get('min_cart_value', 0);
 
         $first_hours = max(1.0, max((float) $this->settings->get('first_reminder_hours', 2), $abandon_hours));
         $second_hours = max(1.0, max((float) $this->settings->get('second_reminder_hours', 24), $abandon_hours));
+        $third_enabled = (bool) $this->settings->get('third_reminder_enabled', false);
+        $third_hours = max(1.0, max((float) $this->settings->get('third_reminder_hours', 72), $abandon_hours));
 
         $subject = $this->settings->get('email_subject') ?: __('Hai dimenticato qualcosa nel carrello', 'fp-cartrecovery');
         $body_template = $this->settings->get('email_body') ?: $this->get_default_body();
@@ -46,8 +71,10 @@ final class EmailScheduler {
 
         $subject_2 = $this->settings->get('email_subject_2') ?: $subject;
         $body_template_2 = $this->settings->get('email_body_2') ?: $body_template;
+        $subject_3 = $this->settings->get('email_subject_3') ?: $subject_2;
+        $body_template_3 = $this->settings->get('email_body_3') ?: $body_template_2;
 
-        $carts_first = $this->repository->find_abandoned_for_reminder((int) ceil($first_hours), 1);
+        $carts_first = $this->repository->find_abandoned_for_reminder((int) ceil($first_hours), 1, 50, $min_cart_value);
         foreach ($carts_first as $cart) {
             if ($this->send_email($cart, $subject, $body_template, 1)) {
                 $this->repository->increment_reminder_sent((int) $cart['id']);
@@ -55,11 +82,21 @@ final class EmailScheduler {
             }
         }
 
-        $carts_second = $this->repository->find_abandoned_for_reminder((int) ceil($second_hours), 2);
+        $carts_second = $this->repository->find_abandoned_for_reminder((int) ceil($second_hours), 2, 50, $min_cart_value);
         foreach ($carts_second as $cart) {
             if ($this->send_email($cart, $subject_2, $body_template_2, 2)) {
                 $this->repository->increment_reminder_sent((int) $cart['id']);
                 $sent++;
+            }
+        }
+
+        if ($third_enabled) {
+            $carts_third = $this->repository->find_abandoned_for_reminder((int) ceil($third_hours), 3, 50, $min_cart_value);
+            foreach ($carts_third as $cart) {
+                if ($this->send_email($cart, $subject_3, $body_template_3, 3)) {
+                    $this->repository->increment_reminder_sent((int) $cart['id']);
+                    $sent++;
+                }
             }
         }
 
@@ -68,13 +105,56 @@ final class EmailScheduler {
         }
     }
 
+    /**
+     * Invia manualmente una reminder per un carrello (da dashboard).
+     *
+     * @return array{success: bool, message: string}
+     */
+    public function send_manual_reminder(int $cart_id): array {
+        global $wpdb;
+        $table = $wpdb->prefix . 'fp_cartrecovery_carts';
+        $row = $wpdb->get_row(
+            $wpdb->prepare("SELECT * FROM {$table} WHERE id = %d AND status = 'abandoned'", $cart_id),
+            ARRAY_A
+        );
+        if (!$row || empty($row['email'])) {
+            return ['success' => false, 'message' => __('Carrello non trovato o senza email.', 'fp-cartrecovery')];
+        }
+
+        $unsubscribe = new UnsubscribeHandler($this->settings);
+        if ($unsubscribe->is_unsubscribed($row['email'])) {
+            return ['success' => false, 'message' => __('Email disiscritta.', 'fp-cartrecovery')];
+        }
+
+        $reminder_num = min(3, (int) ($row['reminder_sent'] ?? 0) + 1);
+        $subject_key = $reminder_num === 1 ? 'email_subject' : ($reminder_num === 2 ? 'email_subject_2' : 'email_subject_3');
+        $body_key = $reminder_num === 1 ? 'email_body' : ($reminder_num === 2 ? 'email_body_2' : 'email_body_3');
+        $subject = $this->settings->get($subject_key) ?: __('Hai dimenticato qualcosa nel carrello', 'fp-cartrecovery');
+        $body = $this->settings->get($body_key) ?: $this->get_default_body();
+
+        if ($this->send_email($row, $subject, $body, $reminder_num)) {
+            $this->repository->increment_reminder_sent($cart_id);
+            return ['success' => true, 'message' => __('Email inviata.', 'fp-cartrecovery')];
+        }
+        return ['success' => false, 'message' => __('Invio fallito.', 'fp-cartrecovery')];
+    }
+
     private function send_email(array $cart, string $subject, string $body_template, int $reminder_number = 1, bool $is_test = false): bool {
         $email = $cart['email'] ?? '';
         if ($email === '') {
             return false;
         }
 
+        if (!$is_test) {
+            $unsubscribe = new UnsubscribeHandler($this->settings);
+            if ($unsubscribe->is_unsubscribed($email)) {
+                return false;
+            }
+        }
+
         $recovery_url = RecoveryHandler::get_recovery_url($cart['recovery_token'] ?? '');
+        $unsubscribe_handler = new UnsubscribeHandler($this->settings);
+        $unsubscribe_url = $unsubscribe_handler->get_unsubscribe_url($email);
         $cart_total_formatted = wc_price((float) ($cart['cart_total'] ?? 0), ['currency' => $cart['currency'] ?? 'EUR']);
         $shop_name = get_bloginfo('name');
         $customer_name = $this->get_customer_name($cart);
@@ -97,6 +177,7 @@ final class EmailScheduler {
             '{{logo_html}}',
             '{{primary_color}}',
             '{{accent_color}}',
+            '{{unsubscribe_url}}',
         ];
         $values = [
             $recovery_url,
@@ -108,6 +189,7 @@ final class EmailScheduler {
             $logo_html,
             $primary_color,
             $accent_color,
+            $unsubscribe_url,
         ];
 
         $body = str_replace($placeholders, $values, $body_template);
@@ -144,9 +226,11 @@ final class EmailScheduler {
         $customer_name = $this->get_customer_name($cart);
         $logo_url = esc_url_raw($this->settings->get('email_logo_url') ?: '');
         $shop_name = get_bloginfo('name');
+        $unsub_url = (new UnsubscribeHandler($this->settings))->get_unsubscribe_url($cart['email'] ?? 'test@example.com');
         $placeholders = [
             '{{recovery_link}}', '{{cart_total}}', '{{shop_name}}', '{{customer_name}}',
             '{{cart_items}}', '{{reminder_number}}', '{{logo_html}}', '{{primary_color}}', '{{accent_color}}',
+            '{{unsubscribe_url}}',
         ];
         $values = [
             wc_get_cart_url(),
@@ -158,6 +242,7 @@ final class EmailScheduler {
             $logo_url !== '' ? '<img src="' . esc_url($logo_url) . '" alt="' . esc_attr($shop_name) . '" style="max-height:60px;width:auto;display:block;margin:0 auto 16px;" />' : '',
             \FP\CartRecovery\Utils\ColorHelper::sanitize_hex($this->settings->get('email_primary_color') ?: '#667eea'),
             \FP\CartRecovery\Utils\ColorHelper::sanitize_hex($this->settings->get('email_accent_color') ?: '#764ba2'),
+            $unsub_url,
         ];
         return str_replace($placeholders, $values, $body_template);
     }

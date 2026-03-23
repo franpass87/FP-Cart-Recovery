@@ -152,35 +152,38 @@ final class AbandonedCartRepository {
     /**
      * Elenco carrelli abbandonati con email (per invio reminder).
      *
+     * @param float $min_cart_value Soglia minimo valore carrello (0 = nessuna).
      * @return array<int, array<string, mixed>>
      */
-    public function find_abandoned_for_reminder(int $older_than_hours, int $reminder_number, int $limit = 50): array {
+    public function find_abandoned_for_reminder(int $older_than_hours, int $reminder_number, int $limit = 50, float $min_cart_value = 0.0): array {
         $reminder_sent = $reminder_number - 1;
         $cutoff = gmdate('Y-m-d H:i:s', strtotime("-{$older_than_hours} hours"));
 
-        $sql = $this->wpdb->prepare(
-            "SELECT * FROM {$this->table}
+        $sql = "SELECT * FROM {$this->table}
             WHERE status = 'abandoned'
             AND email != ''
             AND reminder_sent = %d
-            AND updated_at < %s
-            ORDER BY updated_at ASC
-            LIMIT %d",
-            $reminder_sent,
-            $cutoff,
-            $limit
-        );
+            AND updated_at < %s";
+        $params = [$reminder_sent, $cutoff];
 
-        $rows = $this->wpdb->get_results($sql, ARRAY_A);
+        if ($min_cart_value > 0) {
+            $sql .= ' AND cart_total >= %f';
+            $params[] = $min_cart_value;
+        }
+        $sql .= ' ORDER BY updated_at ASC LIMIT %d';
+        $params[] = $limit;
+
+        $rows = $this->wpdb->get_results($this->wpdb->prepare($sql, ...$params), ARRAY_A);
         return is_array($rows) ? $rows : [];
     }
 
     /**
      * Elenco paginato per admin.
      *
+     * @param int $days 0 = tutti, altrimenti filtra per ultimi X giorni.
      * @return array{items: array<int, array<string, mixed>>, total: int}
      */
-    public function get_paginated(int $page = 1, int $per_page = 20, string $status = ''): array {
+    public function get_paginated(int $page = 1, int $per_page = 20, string $status = '', int $days = 0): array {
         $offset = max(0, ($page - 1) * $per_page);
         $where = '1=1';
         $where_values = [];
@@ -189,20 +192,17 @@ final class AbandonedCartRepository {
             $where .= ' AND status = %s';
             $where_values[] = $status;
         }
-
-        $limit_values = array_merge($where_values, [$per_page, $offset]);
-        $placeholders = array_merge(
-            array_fill(0, count($where_values), '%s'),
-            ['%d', '%d']
-        );
-        $sql = "SELECT * FROM {$this->table} WHERE {$where} ORDER BY updated_at DESC LIMIT " . (int) $per_page . ' OFFSET ' . (int) $offset;
-        if (!empty($where_values)) {
-            $sql = $this->wpdb->prepare(
-                "SELECT * FROM {$this->table} WHERE {$where} ORDER BY updated_at DESC LIMIT %d OFFSET %d",
-                ...$limit_values
-            );
+        if ($days > 0) {
+            $cutoff = gmdate('Y-m-d H:i:s', strtotime("-{$days} days"));
+            $where .= ' AND updated_at >= %s';
+            $where_values[] = $cutoff;
         }
 
+        $limit_values = array_merge($where_values, [$per_page, $offset]);
+        $sql = $this->wpdb->prepare(
+            "SELECT * FROM {$this->table} WHERE {$where} ORDER BY updated_at DESC LIMIT %d OFFSET %d",
+            ...$limit_values
+        );
         $items = $this->wpdb->get_results($sql, ARRAY_A);
 
         $count_sql = "SELECT COUNT(*) FROM {$this->table} WHERE {$where}";
@@ -254,14 +254,50 @@ final class AbandonedCartRepository {
     }
 
     /**
-     * Statistiche per dashboard.
+     * Elimina carrelli abbandonati più vecchi di X giorni.
      *
+     * @return int Numero di righe eliminate.
+     */
+    public function delete_older_than_days(int $days): int {
+        if ($days < 1) {
+            return 0;
+        }
+        $cutoff = gmdate('Y-m-d H:i:s', strtotime("-{$days} days"));
+        return (int) $this->wpdb->query(
+            $this->wpdb->prepare(
+                "DELETE FROM {$this->table} WHERE status = 'abandoned' AND updated_at < %s",
+                $cutoff
+            )
+        );
+    }
+
+    /**
+     * Statistiche per dashboard (con filtro temporale opzionale).
+     *
+     * @param int $days 0 = tutti i dati, altrimenti ultimi X giorni.
      * @return array{abandoned: int, recovered: int, recovered_value: float}
      */
-    public function get_stats(): array {
-        $abandoned = (int) $this->wpdb->get_var("SELECT COUNT(*) FROM {$this->table} WHERE status = 'abandoned'");
-        $recovered = (int) $this->wpdb->get_var("SELECT COUNT(*) FROM {$this->table} WHERE status = 'recovered'");
-        $recovered_value = (float) $this->wpdb->get_var("SELECT COALESCE(SUM(cart_total), 0) FROM {$this->table} WHERE status = 'recovered'");
+    public function get_stats(int $days = 0): array {
+        $cutoff = $days > 0 ? gmdate('Y-m-d H:i:s', strtotime("-{$days} days")) : null;
+
+        if ($cutoff) {
+            $abandoned = (int) $this->wpdb->get_var($this->wpdb->prepare(
+                "SELECT COUNT(*) FROM {$this->table} WHERE status = 'abandoned' AND updated_at >= %s",
+                $cutoff
+            ));
+            $recovered = (int) $this->wpdb->get_var($this->wpdb->prepare(
+                "SELECT COUNT(*) FROM {$this->table} WHERE status = 'recovered' AND updated_at >= %s",
+                $cutoff
+            ));
+            $recovered_value = (float) $this->wpdb->get_var($this->wpdb->prepare(
+                "SELECT COALESCE(SUM(cart_total), 0) FROM {$this->table} WHERE status = 'recovered' AND updated_at >= %s",
+                $cutoff
+            ));
+        } else {
+            $abandoned = (int) $this->wpdb->get_var("SELECT COUNT(*) FROM {$this->table} WHERE status = 'abandoned'");
+            $recovered = (int) $this->wpdb->get_var("SELECT COUNT(*) FROM {$this->table} WHERE status = 'recovered'");
+            $recovered_value = (float) $this->wpdb->get_var("SELECT COALESCE(SUM(cart_total), 0) FROM {$this->table} WHERE status = 'recovered'");
+        }
 
         return [
             'abandoned'       => $abandoned,

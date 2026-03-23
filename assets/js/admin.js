@@ -43,6 +43,27 @@
             });
         });
 
+        $('.fpcartrecovery-send-reminder').on('click', function () {
+            const $btn = $(this);
+            const id = $btn.data('id');
+            if (!id) return;
+            $btn.prop('disabled', true);
+            $.post(fpCartRecoveryConfig.ajaxUrl, {
+                action: 'fp_cartrecovery_send_reminder',
+                nonce: fpCartRecoveryConfig.nonce,
+                id: id
+            }).done(function (r) {
+                if (r.success) {
+                    alert(r.data?.message || 'Email inviata.');
+                    location.reload();
+                } else {
+                    alert(r.data?.message || 'Errore invio.');
+                }
+            }).fail(function () {
+                alert('Errore di connessione.');
+            }).always(function () { $btn.prop('disabled', false); });
+        });
+
         $('.fpcartrecovery-delete-cart').on('click', function () {
             const $btn = $(this);
             const id = $btn.data('id');
@@ -81,6 +102,11 @@
         $('input[name="email_provider"]').on('change', function () {
             const isWp = $(this).val() === 'wp';
             $('.fpcartrecovery-wp-mail-only').toggle(isWp);
+        });
+
+        // Toggle campi 3ª email
+        $('input[name="third_reminder_enabled"]').on('change', function () {
+            $('.fpcartrecovery-third-email').toggle($(this).is(':checked'));
         });
 
         // Anteprima email

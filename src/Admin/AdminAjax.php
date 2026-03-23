@@ -21,6 +21,26 @@ final class AdminAjax {
         add_action('wp_ajax_fp_cartrecovery_delete_cart', [$this, 'delete_cart']);
         add_action('wp_ajax_fp_cartrecovery_send_test_email', [$this, 'send_test_email']);
         add_action('wp_ajax_fp_cartrecovery_preview_email', [$this, 'preview_email']);
+        add_action('wp_ajax_fp_cartrecovery_send_reminder', [$this, 'send_reminder']);
+    }
+
+    public function send_reminder(): void {
+        check_ajax_referer('fp_cartrecovery_admin', 'nonce');
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => __('Permessi insufficienti.', 'fp-cartrecovery')]);
+        }
+
+        $id = absint($_POST['id'] ?? 0);
+        if ($id === 0) {
+            wp_send_json_error(['message' => __('ID non valido.', 'fp-cartrecovery')]);
+        }
+
+        $scheduler = new EmailScheduler($this->settings);
+        $result = $scheduler->send_manual_reminder($id);
+        if ($result['success']) {
+            wp_send_json_success(['message' => $result['message']]);
+        }
+        wp_send_json_error(['message' => $result['message']]);
     }
 
     public function delete_cart(): void {

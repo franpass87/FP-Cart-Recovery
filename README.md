@@ -5,9 +5,9 @@ Plugin WordPress per il **recupero carrelli abbandonati** WooCommerce in stile F
 ## Funzionalità
 
 - **Tracciamento**: salva automaticamente i carrelli con prodotti (utenti loggati e guest), incluse esperienze e gift voucher FP Experiences
-- **Email di richiamo**: invio automatico di reminder dopo 2h e 24h (configurabili)
+- **Email di richiamo**: invio automatico di reminder dopo 2h, 24h e 72h (configurabili, 3ª opzionale)
 - **Link di recovery**: URL univoco per ripristinare il carrello con un click
-- **Dashboard admin**: statistiche e elenco carrelli abbandonati/recuperati
+- **Dashboard admin**: statistiche (con filtro temporale e tasso conversione), export CSV, invio manuale
 - **Integrazione FP Tracking**: eventi `cart_abandoned` (al salvataggio carrello) e `cart_recovery` (al recupero)
 
 ## Requisiti
@@ -48,15 +48,22 @@ Plugin WordPress per il **recupero carrelli abbandonati** WooCommerce in stile F
 - `{{shop_name}}` — Nome del sito
 - `{{customer_name}}` — Nome utente o "Cliente"
 - `{{cart_items}}` — Lista HTML prodotti nel carrello
-- `{{reminder_number}}` — 1 o 2 (prima/seconda email)
+- `{{reminder_number}}` — 1, 2 o 3
+- `{{unsubscribe_url}}` — Link per disiscriversi
 - `{{logo_html}}` — Immagine logo (se configurata)
 - `{{primary_color}}` — Colore primario (es. #667eea)
 - `{{accent_color}}` — Colore accent (es. #764ba2)
 
 ## Tempistiche e scadenza
 
-- **Minuti abbandono**: minimo inattività prima di considerare il carrello abbandonato per le email
+- **Minuti abbandono**: minimo inattività prima di considerare il carrello abbandonato
+- **Soglia minimo carrello**: non inviare email se totale < soglia
 - **Scadenza link**: giorni di validità del link recovery (0 = mai)
+- **Pulizia automatica**: elimina carrelli abbandonati più vecchi di X giorni
+
+## REST API
+
+- `GET /wp-json/fp-cart-recovery/v1/stats?days=30` — Statistiche (abandoned, recovered, recovered_value, conversion_rate). Richiede `manage_options`.
 
 ## Personalizzazione email
 

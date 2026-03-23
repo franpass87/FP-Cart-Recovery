@@ -21,6 +21,8 @@ final class AdminMenu {
         add_action('admin_menu', [$this, 'add_submenus'], 20);
     }
 
+    public const HELP_SLUG = 'fp_cartrecovery_help';
+
     public function add_submenus(): void {
         add_submenu_page(
             'fp_cartrecovery_dashboard',
@@ -30,6 +32,19 @@ final class AdminMenu {
             self::SETTINGS_SLUG,
             [$this, 'render_settings']
         );
+        add_submenu_page(
+            'fp_cartrecovery_dashboard',
+            __('Guida', 'fp-cartrecovery'),
+            __('Guida', 'fp-cartrecovery'),
+            'manage_options',
+            self::HELP_SLUG,
+            [$this, 'render_help']
+        );
+    }
+
+    public function render_help(): void {
+        $page = new HelpPage();
+        $page->render();
     }
 
     public function render_settings(): void {

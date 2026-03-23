@@ -96,12 +96,41 @@ final class SettingsPage {
                                 <span class="fpcartrecovery-hint"><?php echo esc_html__('0 = usa solo ore email. Es: 30 = non inviare a carrelli modificati da meno di 30 min.', 'fp-cartrecovery'); ?></span>
                             </div>
                             <div class="fpcartrecovery-field">
+                                <label><?php echo esc_html__('Soglia minimo carrello (€)', 'fp-cartrecovery'); ?></label>
+                                <input type="number" name="min_cart_value" value="<?php echo esc_attr((string) ($data['min_cart_value'] ?? 0)); ?>" min="0" max="9999" step="0.01" class="small-text">
+                                <span class="fpcartrecovery-hint"><?php echo esc_html__('0 = nessuna. Non inviare email se totale carrello &lt; soglia.', 'fp-cartrecovery'); ?></span>
+                            </div>
+                            <div class="fpcartrecovery-field">
+                                <label><?php echo esc_html__('Frequenza cron', 'fp-cartrecovery'); ?></label>
+                                <select name="cron_interval">
+                                    <option value="fp_cartrecovery_15min" <?php selected(($data['cron_interval'] ?? '') === 'fp_cartrecovery_15min'); ?>><?php echo esc_html__('Ogni 15 minuti', 'fp-cartrecovery'); ?></option>
+                                    <option value="fp_cartrecovery_30min" <?php selected(($data['cron_interval'] ?? '') === 'fp_cartrecovery_30min'); ?>><?php echo esc_html__('Ogni 30 minuti', 'fp-cartrecovery'); ?></option>
+                                    <option value="hourly" <?php selected(($data['cron_interval'] ?? 'hourly') === 'hourly'); ?>><?php echo esc_html__('Ogni ora', 'fp-cartrecovery'); ?></option>
+                                    <option value="twicedaily" <?php selected(($data['cron_interval'] ?? '') === 'twicedaily'); ?>><?php echo esc_html__('Due volte al giorno', 'fp-cartrecovery'); ?></option>
+                                    <option value="daily" <?php selected(($data['cron_interval'] ?? '') === 'daily'); ?>><?php echo esc_html__('Giornaliero', 'fp-cartrecovery'); ?></option>
+                                </select>
+                            </div>
+                            <div class="fpcartrecovery-field">
+                                <label><?php echo esc_html__('Pulizia carrelli (giorni)', 'fp-cartrecovery'); ?></label>
+                                <input type="number" name="cleanup_after_days" value="<?php echo esc_attr((string) ($data['cleanup_after_days'] ?? 90)); ?>" min="0" max="365" class="small-text">
+                                <span class="fpcartrecovery-hint"><?php echo esc_html__('0 = disattiva. Elimina carrelli abbandonati più vecchi.', 'fp-cartrecovery'); ?></span>
+                            </div>
+                            <div class="fpcartrecovery-field">
                                 <label><?php echo esc_html__('Prima email (ore dopo abbandono)', 'fp-cartrecovery'); ?></label>
                                 <input type="number" name="first_reminder_hours" value="<?php echo esc_attr((string) ($data['first_reminder_hours'] ?? 2)); ?>" min="1" max="72" class="small-text">
                             </div>
                             <div class="fpcartrecovery-field">
                                 <label><?php echo esc_html__('Seconda email (ore dopo abbandono)', 'fp-cartrecovery'); ?></label>
                                 <input type="number" name="second_reminder_hours" value="<?php echo esc_attr((string) ($data['second_reminder_hours'] ?? 24)); ?>" min="1" max="168" class="small-text">
+                            </div>
+                            <div class="fpcartrecovery-field">
+                                <label><?php echo esc_html__('Terza email', 'fp-cartrecovery'); ?></label>
+                                <label class="fpcartrecovery-inline-checkbox">
+                                    <input type="checkbox" name="third_reminder_enabled" value="1" <?php checked(!empty($data['third_reminder_enabled'])); ?>>
+                                    <?php echo esc_html__('Attiva', 'fp-cartrecovery'); ?>
+                                </label>
+                                <input type="number" name="third_reminder_hours" value="<?php echo esc_attr((string) ($data['third_reminder_hours'] ?? 72)); ?>" min="1" max="336" class="small-text" style="width:80px;">
+                                <?php echo esc_html__('ore', 'fp-cartrecovery'); ?>
                             </div>
                             <div class="fpcartrecovery-field">
                                 <label><?php echo esc_html__('Scadenza link recovery (giorni)', 'fp-cartrecovery'); ?></label>
@@ -143,7 +172,8 @@ final class SettingsPage {
                                     <tr><td><code>{{shop_name}}</code></td><td><?php echo esc_html__('Nome del sito', 'fp-cartrecovery'); ?></td></tr>
                                     <tr><td><code>{{customer_name}}</code></td><td><?php echo esc_html__('Nome utente o "Cliente"', 'fp-cartrecovery'); ?></td></tr>
                                     <tr><td><code>{{cart_items}}</code></td><td><?php echo esc_html__('Lista HTML prodotti nel carrello', 'fp-cartrecovery'); ?></td></tr>
-                                    <tr><td><code>{{reminder_number}}</code></td><td><?php echo esc_html__('1 o 2 (prima/seconda email)', 'fp-cartrecovery'); ?></td></tr>
+                                    <tr><td><code>{{reminder_number}}</code></td><td><?php echo esc_html__('1, 2 o 3 (prima/seconda/terza email)', 'fp-cartrecovery'); ?></td></tr>
+                                    <tr><td><code>{{unsubscribe_url}}</code></td><td><?php echo esc_html__('Link per disiscriversi', 'fp-cartrecovery'); ?></td></tr>
                                     <tr><td><code>{{logo_html}}</code></td><td><?php echo esc_html__('Immagine logo (se configurata)', 'fp-cartrecovery'); ?></td></tr>
                                     <tr><td><code>{{primary_color}}</code></td><td><?php echo esc_html__('Colore primario (es. #667eea)', 'fp-cartrecovery'); ?></td></tr>
                                     <tr><td><code>{{accent_color}}</code></td><td><?php echo esc_html__('Colore accent (es. #764ba2)', 'fp-cartrecovery'); ?></td></tr>
@@ -169,6 +199,14 @@ final class SettingsPage {
                                 <textarea name="email_body_2" rows="6" class="large-text"><?php echo esc_textarea($data['email_body_2'] ?? ''); ?></textarea>
                                 <span class="fpcartrecovery-hint"><?php echo esc_html__('Vuoto = uguale alla 1ª', 'fp-cartrecovery'); ?></span>
                             </div>
+                            <div class="fpcartrecovery-field fpcartrecovery-field-full fpcartrecovery-third-email"<?php echo empty($data['third_reminder_enabled']) ? ' style="display:none"' : ''; ?>>
+                                <label><?php echo esc_html__('Oggetto 3ª email', 'fp-cartrecovery'); ?></label>
+                                <input type="text" name="email_subject_3" value="<?php echo esc_attr($data['email_subject_3'] ?? ''); ?>" class="large-text">
+                            </div>
+                            <div class="fpcartrecovery-field fpcartrecovery-field-full fpcartrecovery-third-email"<?php echo empty($data['third_reminder_enabled']) ? ' style="display:none"' : ''; ?>>
+                                <label><?php echo esc_html__('Corpo 3ª email', 'fp-cartrecovery'); ?></label>
+                                <textarea name="email_body_3" rows="6" class="large-text"><?php echo esc_textarea($data['email_body_3'] ?? ''); ?></textarea>
+                            </div>
                             <div class="fpcartrecovery-field">
                                 <label><?php echo esc_html__('Nome mittente', 'fp-cartrecovery'); ?></label>
                                 <input type="text" name="from_name" value="<?php echo esc_attr($data['from_name'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr(get_bloginfo('name')); ?>">
@@ -186,18 +224,8 @@ final class SettingsPage {
                         </div>
                         <div class="fpcartrecovery-wp-mail-notice fpcartrecovery-wp-mail-only" style="margin-top:16px;padding:12px 16px;background:#f0f9ff;border-left:4px solid #0ea5e9;border-radius:4px;<?php echo ($data['email_provider'] ?? 'wp') !== 'wp' ? ' display:none' : ''; ?>">
                             <p style="margin:0;font-size:13px;color:#0c4a6e;">
-                                <?php if ( defined( 'FP_FPMAIL_VERSION' ) ) : ?>
-                                <strong><?php echo esc_html__('FP Mail SMTP è attivo:', 'fp-cartrecovery'); ?></strong>
-                                <?php
-                                printf(
-                                    esc_html__( ' centralizza la configurazione SMTP per tutti i plugin FP. Le email wp_mail passano da FP Mail SMTP. Configura in %s.', 'fp-cartrecovery' ),
-                                    '<a href="' . esc_url( admin_url( 'admin.php?page=fp-fpmail' ) ) . '">FP Mail SMTP → Impostazioni</a>'
-                                );
-                                ?>
-                                <?php else : ?>
                                 <strong><?php echo esc_html__('Suggerimento wp_mail:', 'fp-cartrecovery'); ?></strong>
-                                <?php echo esc_html__('Per una deliverability migliore, considera FP Mail SMTP (centralizza SMTP per tutti i plugin FP) o un altro plugin SMTP.', 'fp-cartrecovery'); ?>
-                                <?php endif; ?>
+                                <?php echo esc_html__('Per una deliverability migliore, considera un plugin SMTP (es. WP Mail SMTP, FluentSMTP) o un servizio di invio.', 'fp-cartrecovery'); ?>
                             </p>
                         </div>
                         <div class="fpcartrecovery-fields-grid" style="margin-top:20px;padding-top:20px;border-top:1px solid #e5e7eb;">
@@ -218,6 +246,30 @@ final class SettingsPage {
                             <div class="fpcartrecovery-field">
                                 <label><?php echo esc_html__('Colore accent', 'fp-cartrecovery'); ?></label>
                                 <input type="text" name="email_accent_color" value="<?php echo esc_attr($data['email_accent_color'] ?? '#764ba2'); ?>" class="small-text" placeholder="#764ba2" maxlength="7" style="width:100px;">
+                            </div>
+                            <div class="fpcartrecovery-field fpcartrecovery-field-full">
+                                <label><?php echo esc_html__('Pagina unsubscribe', 'fp-cartrecovery'); ?></label>
+                                <?php
+                                wp_dropdown_pages([
+                                    'name' => 'unsubscribe_page_id',
+                                    'selected' => (int) ($data['unsubscribe_page_id'] ?? 0),
+                                    'show_option_none' => __('— Nessuna (usa homepage)', 'fp-cartrecovery'),
+                                    'option_none_value' => '0',
+                                ]);
+                                ?>
+                                <span class="fpcartrecovery-hint"><?php echo esc_html__('Pagina di destinazione dopo disiscrizione. Il link {{unsubscribe_url}} funziona comunque.', 'fp-cartrecovery'); ?></span>
+                            </div>
+                        </div>
+                        <div class="fpcartrecovery-fields-grid" style="margin-top:20px;padding-top:20px;border-top:1px solid #e5e7eb;">
+                            <div class="fpcartrecovery-field fpcartrecovery-field-full">
+                                <label><?php echo esc_html__('Escludi prodotti (ID)', 'fp-cartrecovery'); ?></label>
+                                <input type="text" name="exclude_product_ids" value="<?php echo esc_attr(is_array($data['exclude_product_ids'] ?? null) ? implode(',', array_map('absint', $data['exclude_product_ids'])) : ($data['exclude_product_ids'] ?? '')); ?>" class="regular-text" placeholder="123, 456">
+                                <span class="fpcartrecovery-hint"><?php echo esc_html__('ID prodotti separati da virgola. Non tracciare carrelli che contengono solo questi.', 'fp-cartrecovery'); ?></span>
+                            </div>
+                            <div class="fpcartrecovery-field fpcartrecovery-field-full">
+                                <label><?php echo esc_html__('Escludi categorie (ID)', 'fp-cartrecovery'); ?></label>
+                                <input type="text" name="exclude_category_ids" value="<?php echo esc_attr(is_array($data['exclude_category_ids'] ?? null) ? implode(',', array_map('absint', $data['exclude_category_ids'])) : ($data['exclude_category_ids'] ?? '')); ?>" class="regular-text" placeholder="5, 12">
+                                <span class="fpcartrecovery-hint"><?php echo esc_html__('ID categorie prodotto separati da virgola.', 'fp-cartrecovery'); ?></span>
                             </div>
                         </div>
                     </div>
@@ -247,13 +299,24 @@ final class SettingsPage {
         $track_guests = !empty($_POST['track_guests']);
         $email_provider = in_array($_POST['email_provider'] ?? '', ['wp', 'brevo'], true) ? $_POST['email_provider'] : 'wp';
         $abandon_min = max(0, min(1440, absint($_POST['abandon_after_minutes'] ?? 30)));
+        $min_cart_value = max(0.0, (float) ($_POST['min_cart_value'] ?? 0));
+        $cleanup_days = max(0, min(365, absint($_POST['cleanup_after_days'] ?? 90)));
+        $cron_interval = in_array($_POST['cron_interval'] ?? '', ['fp_cartrecovery_15min', 'fp_cartrecovery_30min', 'hourly', 'twicedaily', 'daily'], true)
+            ? $_POST['cron_interval'] : 'hourly';
         $first_hours = max(1, min(72, absint($_POST['first_reminder_hours'] ?? 2)));
         $second_hours = max(1, min(168, absint($_POST['second_reminder_hours'] ?? 24)));
+        $third_enabled = !empty($_POST['third_reminder_enabled']);
+        $third_hours = max(1, min(336, absint($_POST['third_reminder_hours'] ?? 72)));
         $expiry_days = max(0, min(365, absint($_POST['recovery_link_expiry_days'] ?? 0)));
+        $unsubscribe_page_id = max(0, absint($_POST['unsubscribe_page_id'] ?? 0));
+        $exclude_products = array_filter(array_map('absint', explode(',', sanitize_text_field(wp_unslash($_POST['exclude_product_ids'] ?? '')))));
+        $exclude_cats = array_filter(array_map('absint', explode(',', sanitize_text_field(wp_unslash($_POST['exclude_category_ids'] ?? '')))));
         $email_subject = sanitize_text_field(wp_unslash($_POST['email_subject'] ?? ''));
         $email_body = wp_kses_post(wp_unslash($_POST['email_body'] ?? ''));
         $email_subject_2 = sanitize_text_field(wp_unslash($_POST['email_subject_2'] ?? ''));
         $email_body_2 = wp_kses_post(wp_unslash($_POST['email_body_2'] ?? ''));
+        $email_subject_3 = sanitize_text_field(wp_unslash($_POST['email_subject_3'] ?? ''));
+        $email_body_3 = wp_kses_post(wp_unslash($_POST['email_body_3'] ?? ''));
         $from_name = sanitize_text_field(wp_unslash($_POST['from_name'] ?? ''));
         $from_email = sanitize_email(wp_unslash($_POST['from_email'] ?? ''));
         $reply_to = sanitize_email(wp_unslash($_POST['reply_to_email'] ?? ''));
@@ -261,14 +324,25 @@ final class SettingsPage {
         $primary_color = ColorHelper::sanitize_hex(sanitize_text_field(wp_unslash($_POST['email_primary_color'] ?? '#667eea')));
         $accent_color = ColorHelper::sanitize_hex(sanitize_text_field(wp_unslash($_POST['email_accent_color'] ?? '#764ba2')));
 
+        $old_cron = $this->settings->get('cron_interval', 'hourly');
         $this->settings->save([
             'enabled'                  => $enabled,
             'track_guests'             => $track_guests,
             'email_provider'           => $email_provider,
             'abandon_after_minutes'    => $abandon_min,
+            'min_cart_value'           => $min_cart_value,
+            'cleanup_after_days'       => $cleanup_days,
+            'cron_interval'            => $cron_interval,
+            'third_reminder_enabled'   => $third_enabled,
+            'third_reminder_hours'     => $third_hours,
             'first_reminder_hours'     => $first_hours,
             'second_reminder_hours'    => $second_hours,
             'recovery_link_expiry_days'=> $expiry_days,
+            'unsubscribe_page_id'      => $unsubscribe_page_id,
+            'exclude_product_ids'      => $exclude_products,
+            'exclude_category_ids'     => $exclude_cats,
+            'email_subject_3'          => $email_subject_3,
+            'email_body_3'             => $email_body_3,
             'email_subject'         => $email_subject,
             'email_body'            => $email_body,
             'email_subject_2'       => $email_subject_2,
@@ -280,6 +354,10 @@ final class SettingsPage {
             'email_primary_color'   => $primary_color,
             'email_accent_color'    => $accent_color,
         ]);
+
+        if ($cron_interval !== $old_cron) {
+            wp_clear_scheduled_hook(\FP\CartRecovery\Integrations\EmailScheduler::CRON_HOOK);
+        }
 
         add_settings_error(
             'fp_cartrecovery',

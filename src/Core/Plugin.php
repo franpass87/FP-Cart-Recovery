@@ -80,6 +80,12 @@ final class Plugin {
         $recovery_handler = new RecoveryHandler($this->settings);
         $recovery_handler->register();
 
+        $unsubscribe_handler = new \FP\CartRecovery\Integrations\UnsubscribeHandler($this->settings);
+        $unsubscribe_handler->register();
+
+        $cleanup_cron = new \FP\CartRecovery\Integrations\CleanupCron($this->settings);
+        $cleanup_cron->register();
+
         if ($this->settings->get('enabled', false)) {
             $email_scheduler = new EmailScheduler($this->settings);
             $email_scheduler->register();
@@ -90,6 +96,9 @@ final class Plugin {
 
         $admin_ajax = new \FP\CartRecovery\Admin\AdminAjax($this->settings);
         $admin_ajax->register();
+
+        $rest_stats = new \FP\CartRecovery\Rest\StatsController();
+        $rest_stats->register();
     }
 
     public function register_admin_menu(): void {
@@ -136,7 +145,7 @@ final class Plugin {
     public function enqueue_admin_assets(string $hook): void {
         $page = isset($_GET['page']) ? sanitize_text_field(wp_unslash($_GET['page'])) : '';
         $is_our_page = str_contains($hook, 'fp_cartrecovery')
-            || in_array($page, ['fp_cartrecovery_dashboard', 'fp_cartrecovery_settings'], true);
+            || in_array($page, ['fp_cartrecovery_dashboard', 'fp_cartrecovery_settings', 'fp_cartrecovery_help'], true);
 
         if (!$is_our_page) {
             return;
