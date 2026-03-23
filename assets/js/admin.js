@@ -21,7 +21,13 @@
                 });
                 mediaFrame.on('select', function () {
                     const attachment = mediaFrame.state().get('selection').first().toJSON();
-                    $('#fpcartrecovery-logo-url').val(attachment.url || '');
+                    const url = attachment.url || '';
+                    $('#fpcartrecovery-logo-url').val(url);
+                    let $prev = $('.fpcartrecovery-logo-preview');
+                    if (url) {
+                        if (!$prev.length) $prev = $('<div class="fpcartrecovery-logo-preview"></div>').prependTo('.fpcartrecovery-logo-picker');
+                        $prev.html('<img src="' + url + '" alt="Logo" />').show();
+                    } else if ($prev.length) $prev.hide();
                 });
                 mediaFrame.open();
             });
@@ -108,6 +114,31 @@
         $('input[name="third_reminder_enabled"]').on('change', function () {
             $('.fpcartrecovery-third-email').toggle($(this).is(':checked'));
         });
+
+        // Sincronizza color picker con input hex e anteprima
+        function syncColorPicker(pickerId, textId, varName) {
+            const $picker = $('#' + pickerId);
+            const $text = $('#' + textId);
+            const $preview = $('.fpcartrecovery-branding-preview');
+            if (!$picker.length || !$text.length) return;
+            function updatePreview(val) {
+                if ($preview.length && val) $preview.css(varName, val);
+            }
+            $picker.on('input', function () {
+                const v = $(this).val();
+                $text.val(v);
+                updatePreview(v);
+            });
+            $text.on('input', function () {
+                const v = $(this).val();
+                if (/^#[0-9A-Fa-f]{6}$/.test(v)) {
+                    $picker.val(v);
+                    updatePreview(v);
+                }
+            });
+        }
+        syncColorPicker('fpcartrecovery-primary-color-picker', 'fpcartrecovery-primary-color', '--preview-primary');
+        syncColorPicker('fpcartrecovery-accent-color-picker', 'fpcartrecovery-accent-color', '--preview-accent');
 
         // Anteprima email
         $('#fpcartrecovery-preview-email').on('click', function () {

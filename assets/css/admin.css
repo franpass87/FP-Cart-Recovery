@@ -404,3 +404,263 @@ body[class*="fpcartrecovery"] #wpbody-content > .wrap.fpcartrecovery-admin-page 
 .fpcartrecovery-pagination {
     margin-top: 20px;
 }
+
+/* ========== Email Settings (estetica migliorata) ========== */
+
+.fpcartrecovery-card-email .fpcartrecovery-card-body {
+    padding: 24px;
+}
+
+.fpcartrecovery-email-section {
+    margin-bottom: 28px;
+}
+
+.fpcartrecovery-email-section:last-of-type {
+    margin-bottom: 0;
+}
+
+.fpcartrecovery-email-section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--fpdms-text);
+}
+
+.fpcartrecovery-email-section-title .dashicons {
+    color: var(--fpdms-primary);
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+/* Provider pills */
+.fpcartrecovery-radio-pills {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.fpcartrecovery-radio-pill {
+    cursor: pointer;
+    margin: 0;
+}
+
+.fpcartrecovery-radio-pill input {
+    position: absolute;
+    opacity: 0;
+}
+
+.fpcartrecovery-radio-pill-label {
+    display: block;
+    padding: 10px 20px;
+    border: 2px solid var(--fpdms-border);
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.fpcartrecovery-radio-pill input:checked + .fpcartrecovery-radio-pill-label {
+    border-color: var(--fpdms-primary);
+    background: linear-gradient(135deg, rgba(102,126,234,0.08) 0%, rgba(118,75,162,0.08) 100%);
+    color: var(--fpdms-primary);
+}
+
+.fpcartrecovery-radio-pill:hover .fpcartrecovery-radio-pill-label {
+    border-color: var(--fpdms-primary);
+}
+
+.fpcartrecovery-wp-mail-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, rgba(14,165,233,0.06) 0%, rgba(59,130,246,0.06) 100%);
+    border-radius: var(--radius-md);
+    border-left: 3px solid #0ea5e9;
+}
+
+.fpcartrecovery-wp-mail-notice .dashicons {
+    color: #0ea5e9;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.fpcartrecovery-wp-mail-notice span:last-child {
+    font-size: 13px;
+    color: #0c4a6e;
+}
+
+/* Branding preview */
+.fpcartrecovery-branding-preview {
+    background: var(--fpdms-bg-light);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    border: 1px solid var(--fpdms-border-light);
+}
+
+.fpcartrecovery-branding-preview-strip {
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, var(--preview-primary, #667eea) 0%, var(--preview-accent, #764ba2) 100%);
+    margin-bottom: 20px;
+}
+
+.fpcartrecovery-branding-fields {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: start;
+}
+
+@media (max-width: 782px) {
+    .fpcartrecovery-branding-fields {
+        grid-template-columns: 1fr;
+    }
+}
+
+.fpcartrecovery-logo-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.fpcartrecovery-logo-preview {
+    max-width: 120px;
+    max-height: 60px;
+}
+
+.fpcartrecovery-logo-preview img {
+    max-width: 100%;
+    max-height: 60px;
+    object-fit: contain;
+}
+
+.fpcartrecovery-logo-input-wrap {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.fpcartrecovery-logo-input-wrap input {
+    flex: 1;
+    min-width: 0;
+}
+
+.fpcartrecovery-color-pair {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.fpcartrecovery-color-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.fpcartrecovery-color-input input[type="color"] {
+    width: 40px;
+    height: 36px;
+    padding: 2px;
+    border: 2px solid var(--fpdms-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+}
+
+.fpcartrecovery-color-input input[type="text"] {
+    width: 90px;
+    font-family: monospace;
+}
+
+/* Placeholders grid */
+.fpcartrecovery-placeholders-box {
+    margin: 20px 0;
+    border: 1px solid var(--fpdms-border-light);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.fpcartrecovery-placeholders-box summary {
+    padding: 12px 16px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--fpdms-bg-light);
+}
+
+.fpcartrecovery-placeholders-box summary:hover {
+    background: #f1f5f9;
+}
+
+.fpcartrecovery-placeholders-box summary .dashicons {
+    color: var(--fpdms-primary);
+}
+
+.fpcartrecovery-placeholders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+    padding: 16px;
+}
+
+.fpcartrecovery-placeholder-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px;
+    background: #fff;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--fpdms-border-light);
+}
+
+.fpcartrecovery-placeholder-item code {
+    font-size: 12px;
+    color: var(--fpdms-primary);
+    font-weight: 600;
+}
+
+.fpcartrecovery-placeholder-item span {
+    font-size: 11px;
+    color: var(--fpdms-text-muted);
+}
+
+/* Email tabs */
+.fpcartrecovery-email-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.fpcartrecovery-email-tab {
+    padding: 20px;
+    background: var(--fpdms-bg-light);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--fpdms-border-light);
+}
+
+.fpcartrecovery-email-tab h4 {
+    margin: 0 0 16px;
+    font-size: 13px;
+    color: var(--fpdms-primary);
+    font-weight: 600;
+}
+
+.fpcartrecovery-email-tab .fpcartrecovery-field {
+    margin-bottom: 16px;
+}
+
+.fpcartrecovery-email-tab .fpcartrecovery-field:last-child {
+    margin-bottom: 0;
+}
+
+.fpcartrecovery-fields-inline {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}

@@ -141,135 +141,168 @@ final class SettingsPage {
                     </div>
                 </div>
 
-                <div class="fpcartrecovery-card">
+                <div class="fpcartrecovery-card fpcartrecovery-card-email">
                     <div class="fpcartrecovery-card-header">
                         <div class="fpcartrecovery-card-header-left">
-                            <span class="dashicons dashicons-email"></span>
+                            <span class="dashicons dashicons-email-alt"></span>
                             <h2><?php echo esc_html__('Email di richiamo', 'fp-cartrecovery'); ?></h2>
                         </div>
                     </div>
                     <div class="fpcartrecovery-card-body">
-                        <div class="fpcartrecovery-field fpcartrecovery-field-full" style="margin-bottom:16px">
-                            <label><?php echo esc_html__('Invio email', 'fp-cartrecovery'); ?></label>
-                            <div class="fpcartrecovery-radio-group">
-                                <label>
+                        <div class="fpcartrecovery-email-section fpcartrecovery-email-provider">
+                            <h3 class="fpcartrecovery-email-section-title"><span class="dashicons dashicons-admin-generic"></span> <?php echo esc_html__('Invio', 'fp-cartrecovery'); ?></h3>
+                            <div class="fpcartrecovery-radio-group fpcartrecovery-radio-pills">
+                                <label class="fpcartrecovery-radio-pill">
                                     <input type="radio" name="email_provider" value="wp" <?php checked(($data['email_provider'] ?? 'wp') === 'wp'); ?>>
-                                    <?php echo esc_html__('WordPress (wp_mail)', 'fp-cartrecovery'); ?>
+                                    <span class="fpcartrecovery-radio-pill-label"><?php echo esc_html__('WordPress (wp_mail)', 'fp-cartrecovery'); ?></span>
                                 </label>
-                                <label>
+                                <label class="fpcartrecovery-radio-pill">
                                     <input type="radio" name="email_provider" value="brevo" <?php checked(($data['email_provider'] ?? '') === 'brevo'); ?>>
-                                    <?php echo esc_html__('Brevo (API + evento FP Tracking)', 'fp-cartrecovery'); ?>
+                                    <span class="fpcartrecovery-radio-pill-label"><?php echo esc_html__('Brevo (API)', 'fp-cartrecovery'); ?></span>
                                 </label>
                             </div>
-                            <span class="fpcartrecovery-hint"><?php echo esc_html__('Brevo usa le impostazioni di FP Marketing Tracking Layer. Con Brevo viene emesso l\'evento cart_recovery_email_sent a fp_tracking_event.', 'fp-cartrecovery'); ?></span>
-                        </div>
-                        <details class="fpcartrecovery-placeholders" style="margin-bottom:16px">
-                            <summary><?php echo esc_html__('Placeholder disponibili', 'fp-cartrecovery'); ?></summary>
-                            <table class="widefat" style="margin-top:8px">
-                                <tbody>
-                                    <tr><td><code>{{recovery_link}}</code></td><td><?php echo esc_html__('URL per ripristinare il carrello', 'fp-cartrecovery'); ?></td></tr>
-                                    <tr><td><code>{{cart_total}}</code></td><td><?php echo esc_html__('Totale formattato (es. €29,90)', 'fp-cartrecovery'); ?></td></tr>
-                                    <tr><td><code>{{shop_name}}</code></td><td><?php echo esc_html__('Nome del sito', 'fp-cartrecovery'); ?></td></tr>
-                                    <tr><td><code>{{customer_name}}</code></td><td><?php echo esc_html__('Nome utente o "Cliente"', 'fp-cartrecovery'); ?></td></tr>
-                                    <tr><td><code>{{cart_items}}</code></td><td><?php echo esc_html__('Lista HTML prodotti nel carrello', 'fp-cartrecovery'); ?></td></tr>
-                                    <tr><td><code>{{reminder_number}}</code></td><td><?php echo esc_html__('1, 2 o 3 (prima/seconda/terza email)', 'fp-cartrecovery'); ?></td></tr>
-                                    <tr><td><code>{{unsubscribe_url}}</code></td><td><?php echo esc_html__('Link per disiscriversi', 'fp-cartrecovery'); ?></td></tr>
-                                    <tr><td><code>{{logo_html}}</code></td><td><?php echo esc_html__('Immagine logo (se configurata)', 'fp-cartrecovery'); ?></td></tr>
-                                    <tr><td><code>{{primary_color}}</code></td><td><?php echo esc_html__('Colore primario (es. #667eea)', 'fp-cartrecovery'); ?></td></tr>
-                                    <tr><td><code>{{accent_color}}</code></td><td><?php echo esc_html__('Colore accent (es. #764ba2)', 'fp-cartrecovery'); ?></td></tr>
-                                </tbody>
-                            </table>
-                        </details>
-                        <div class="fpcartrecovery-fields-grid">
-                            <div class="fpcartrecovery-field fpcartrecovery-field-full">
-                                <label><?php echo esc_html__('Oggetto 1ª email', 'fp-cartrecovery'); ?></label>
-                                <input type="text" name="email_subject" value="<?php echo esc_attr($data['email_subject'] ?? ''); ?>" class="large-text" placeholder="<?php echo esc_attr__('Hai dimenticato qualcosa nel carrello', 'fp-cartrecovery'); ?>">
-                            </div>
-                            <div class="fpcartrecovery-field fpcartrecovery-field-full">
-                                <label><?php echo esc_html__('Corpo 1ª email (HTML, vuoto = template default)', 'fp-cartrecovery'); ?></label>
-                                <textarea name="email_body" rows="6" class="large-text"><?php echo esc_textarea($data['email_body'] ?? ''); ?></textarea>
-                            </div>
-                            <div class="fpcartrecovery-field fpcartrecovery-field-full">
-                                <label><?php echo esc_html__('Oggetto 2ª email', 'fp-cartrecovery'); ?></label>
-                                <input type="text" name="email_subject_2" value="<?php echo esc_attr($data['email_subject_2'] ?? ''); ?>" class="large-text" placeholder="<?php echo esc_attr__('Il tuo carrello ti aspetta ancora', 'fp-cartrecovery'); ?>">
-                                <span class="fpcartrecovery-hint"><?php echo esc_html__('Vuoto = uguale alla 1ª', 'fp-cartrecovery'); ?></span>
-                            </div>
-                            <div class="fpcartrecovery-field fpcartrecovery-field-full">
-                                <label><?php echo esc_html__('Corpo 2ª email', 'fp-cartrecovery'); ?></label>
-                                <textarea name="email_body_2" rows="6" class="large-text"><?php echo esc_textarea($data['email_body_2'] ?? ''); ?></textarea>
-                                <span class="fpcartrecovery-hint"><?php echo esc_html__('Vuoto = uguale alla 1ª', 'fp-cartrecovery'); ?></span>
-                            </div>
-                            <div class="fpcartrecovery-field fpcartrecovery-field-full fpcartrecovery-third-email"<?php echo empty($data['third_reminder_enabled']) ? ' style="display:none"' : ''; ?>>
-                                <label><?php echo esc_html__('Oggetto 3ª email', 'fp-cartrecovery'); ?></label>
-                                <input type="text" name="email_subject_3" value="<?php echo esc_attr($data['email_subject_3'] ?? ''); ?>" class="large-text">
-                            </div>
-                            <div class="fpcartrecovery-field fpcartrecovery-field-full fpcartrecovery-third-email"<?php echo empty($data['third_reminder_enabled']) ? ' style="display:none"' : ''; ?>>
-                                <label><?php echo esc_html__('Corpo 3ª email', 'fp-cartrecovery'); ?></label>
-                                <textarea name="email_body_3" rows="6" class="large-text"><?php echo esc_textarea($data['email_body_3'] ?? ''); ?></textarea>
-                            </div>
-                            <div class="fpcartrecovery-field">
-                                <label><?php echo esc_html__('Nome mittente', 'fp-cartrecovery'); ?></label>
-                                <input type="text" name="from_name" value="<?php echo esc_attr($data['from_name'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr(get_bloginfo('name')); ?>">
-                            </div>
-                            <div class="fpcartrecovery-field">
-                                <label><?php echo esc_html__('Email mittente', 'fp-cartrecovery'); ?></label>
-                                <input type="email" name="from_email" value="<?php echo esc_attr($data['from_email'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr(get_option('admin_email')); ?>">
-                                <span class="fpcartrecovery-hint"><?php echo esc_html__('Vuoto = email admin', 'fp-cartrecovery'); ?></span>
-                            </div>
-                            <div class="fpcartrecovery-field fpcartrecovery-wp-mail-only"<?php echo ($data['email_provider'] ?? 'wp') !== 'wp' ? ' style="display:none"' : ''; ?>>
-                                <label><?php echo esc_html__('Reply-To (solo wp_mail)', 'fp-cartrecovery'); ?></label>
-                                <input type="email" name="reply_to_email" value="<?php echo esc_attr($data['reply_to_email'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr(get_option('admin_email')); ?>">
-                                <span class="fpcartrecovery-hint"><?php echo esc_html__('Vuoto = uguale a email mittente', 'fp-cartrecovery'); ?></span>
+                            <span class="fpcartrecovery-hint"><?php echo esc_html__('Brevo usa le impostazioni di FP Marketing Tracking Layer.', 'fp-cartrecovery'); ?></span>
+                            <div class="fpcartrecovery-wp-mail-notice fpcartrecovery-wp-mail-only"<?php echo ($data['email_provider'] ?? 'wp') !== 'wp' ? ' style="display:none"' : ''; ?>>
+                                <span class="dashicons dashicons-info"></span>
+                                <span><?php echo esc_html__('Per una deliverability migliore, considera un plugin SMTP (es. WP Mail SMTP, FluentSMTP).', 'fp-cartrecovery'); ?></span>
                             </div>
                         </div>
-                        <div class="fpcartrecovery-wp-mail-notice fpcartrecovery-wp-mail-only" style="margin-top:16px;padding:12px 16px;background:#f0f9ff;border-left:4px solid #0ea5e9;border-radius:4px;<?php echo ($data['email_provider'] ?? 'wp') !== 'wp' ? ' display:none' : ''; ?>">
-                            <p style="margin:0;font-size:13px;color:#0c4a6e;">
-                                <strong><?php echo esc_html__('Suggerimento wp_mail:', 'fp-cartrecovery'); ?></strong>
-                                <?php echo esc_html__('Per una deliverability migliore, considera un plugin SMTP (es. WP Mail SMTP, FluentSMTP) o un servizio di invio.', 'fp-cartrecovery'); ?>
-                            </p>
-                        </div>
-                        <div class="fpcartrecovery-fields-grid" style="margin-top:20px;padding-top:20px;border-top:1px solid #e5e7eb;">
-                            <div class="fpcartrecovery-field fpcartrecovery-field-full">
-                                <label><?php echo esc_html__('Logo email', 'fp-cartrecovery'); ?></label>
-                                <div style="display:flex;gap:8px;align-items:center;">
-                                    <input type="url" id="fpcartrecovery-logo-url" name="email_logo_url" value="<?php echo esc_attr($data['email_logo_url'] ?? ''); ?>" class="large-text" placeholder="https://...">
-                                    <button type="button" id="fpcartrecovery-logo-upload" class="fpcartrecovery-btn fpcartrecovery-btn-secondary" style="white-space:nowrap;">
-                                        <?php echo esc_html__('Seleziona da Media', 'fp-cartrecovery'); ?>
-                                    </button>
+
+                        <div class="fpcartrecovery-email-section fpcartrecovery-email-aspetto">
+                            <h3 class="fpcartrecovery-email-section-title"><span class="dashicons dashicons-art"></span> <?php echo esc_html__('Aspetto email', 'fp-cartrecovery'); ?></h3>
+                            <div class="fpcartrecovery-branding-preview" style="--preview-primary:<?php echo esc_attr(\FP\CartRecovery\Utils\ColorHelper::sanitize_hex($data['email_primary_color'] ?? '#667eea')); ?>;--preview-accent:<?php echo esc_attr(\FP\CartRecovery\Utils\ColorHelper::sanitize_hex($data['email_accent_color'] ?? '#764ba2')); ?>">
+                                <div class="fpcartrecovery-branding-preview-strip"></div>
+                                <div class="fpcartrecovery-branding-fields">
+                                    <div class="fpcartrecovery-field fpcartrecovery-logo-field">
+                                        <label><?php echo esc_html__('Logo', 'fp-cartrecovery'); ?></label>
+                                        <div class="fpcartrecovery-logo-picker">
+                                            <?php $logo_url = esc_url_raw($data['email_logo_url'] ?? ''); ?>
+                                            <?php if ($logo_url) : ?>
+                                                <div class="fpcartrecovery-logo-preview"><img src="<?php echo esc_url($logo_url); ?>" alt="Logo" /></div>
+                                            <?php endif; ?>
+                                            <div class="fpcartrecovery-logo-input-wrap">
+                                                <input type="url" id="fpcartrecovery-logo-url" name="email_logo_url" value="<?php echo esc_attr($logo_url); ?>" placeholder="https://..." class="regular-text">
+                                                <button type="button" id="fpcartrecovery-logo-upload" class="fpcartrecovery-btn fpcartrecovery-btn-secondary"><?php echo esc_html__('Media', 'fp-cartrecovery'); ?></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="fpcartrecovery-color-pair">
+                                        <div class="fpcartrecovery-field">
+                                            <label><?php echo esc_html__('Colore primario', 'fp-cartrecovery'); ?></label>
+                                            <div class="fpcartrecovery-color-input">
+                                                <input type="color" id="fpcartrecovery-primary-color-picker" value="<?php echo esc_attr(\FP\CartRecovery\Utils\ColorHelper::sanitize_hex($data['email_primary_color'] ?? '#667eea')); ?>" title="<?php echo esc_attr__('Scegli colore', 'fp-cartrecovery'); ?>">
+                                                <input type="text" name="email_primary_color" id="fpcartrecovery-primary-color" value="<?php echo esc_attr($data['email_primary_color'] ?? '#667eea'); ?>" maxlength="7" placeholder="#667eea">
+                                            </div>
+                                        </div>
+                                        <div class="fpcartrecovery-field">
+                                            <label><?php echo esc_html__('Colore accent', 'fp-cartrecovery'); ?></label>
+                                            <div class="fpcartrecovery-color-input">
+                                                <input type="color" id="fpcartrecovery-accent-color-picker" value="<?php echo esc_attr(\FP\CartRecovery\Utils\ColorHelper::sanitize_hex($data['email_accent_color'] ?? '#764ba2')); ?>" title="<?php echo esc_attr__('Scegli colore', 'fp-cartrecovery'); ?>">
+                                                <input type="text" name="email_accent_color" id="fpcartrecovery-accent-color" value="<?php echo esc_attr($data['email_accent_color'] ?? '#764ba2'); ?>" maxlength="7" placeholder="#764ba2">
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <span class="fpcartrecovery-hint"><?php echo esc_html__('Logo mostrato nell\'header delle email (max altezza 60px). Vuoto = nessun logo.', 'fp-cartrecovery'); ?></span>
                             </div>
+                        </div>
+
+                        <div class="fpcartrecovery-email-section fpcartrecovery-email-mittente">
+                            <h3 class="fpcartrecovery-email-section-title"><span class="dashicons dashicons-email"></span> <?php echo esc_html__('Mittente', 'fp-cartrecovery'); ?></h3>
+                            <div class="fpcartrecovery-fields-grid fpcartrecovery-fields-inline">
+                                <div class="fpcartrecovery-field">
+                                    <label><?php echo esc_html__('Nome', 'fp-cartrecovery'); ?></label>
+                                    <input type="text" name="from_name" value="<?php echo esc_attr($data['from_name'] ?? ''); ?>" placeholder="<?php echo esc_attr(get_bloginfo('name')); ?>">
+                                </div>
+                                <div class="fpcartrecovery-field">
+                                    <label><?php echo esc_html__('Email', 'fp-cartrecovery'); ?></label>
+                                    <input type="email" name="from_email" value="<?php echo esc_attr($data['from_email'] ?? ''); ?>" placeholder="<?php echo esc_attr(get_option('admin_email')); ?>">
+                                </div>
+                                <div class="fpcartrecovery-field fpcartrecovery-wp-mail-only"<?php echo ($data['email_provider'] ?? 'wp') !== 'wp' ? ' style="display:none"' : ''; ?>>
+                                    <label><?php echo esc_html__('Reply-To', 'fp-cartrecovery'); ?></label>
+                                    <input type="email" name="reply_to_email" value="<?php echo esc_attr($data['reply_to_email'] ?? ''); ?>" placeholder="<?php echo esc_attr(get_option('admin_email')); ?>">
+                                </div>
+                            </div>
+                        </div>
+
+                        <details class="fpcartrecovery-placeholders-box">
+                            <summary><span class="dashicons dashicons-editor-code"></span> <?php echo esc_html__('Placeholder disponibili', 'fp-cartrecovery'); ?></summary>
+                            <div class="fpcartrecovery-placeholders-grid">
+                                <div class="fpcartrecovery-placeholder-item"><code>{{recovery_link}}</code><span><?php echo esc_html__('URL recupero carrello', 'fp-cartrecovery'); ?></span></div>
+                                <div class="fpcartrecovery-placeholder-item"><code>{{cart_total}}</code><span><?php echo esc_html__('Totale formattato', 'fp-cartrecovery'); ?></span></div>
+                                <div class="fpcartrecovery-placeholder-item"><code>{{shop_name}}</code><span><?php echo esc_html__('Nome sito', 'fp-cartrecovery'); ?></span></div>
+                                <div class="fpcartrecovery-placeholder-item"><code>{{customer_name}}</code><span><?php echo esc_html__('Nome utente', 'fp-cartrecovery'); ?></span></div>
+                                <div class="fpcartrecovery-placeholder-item"><code>{{cart_items}}</code><span><?php echo esc_html__('Lista prodotti HTML', 'fp-cartrecovery'); ?></span></div>
+                                <div class="fpcartrecovery-placeholder-item"><code>{{reminder_number}}</code><span><?php echo esc_html__('1, 2 o 3', 'fp-cartrecovery'); ?></span></div>
+                                <div class="fpcartrecovery-placeholder-item"><code>{{unsubscribe_url}}</code><span><?php echo esc_html__('Link disiscrizione', 'fp-cartrecovery'); ?></span></div>
+                                <div class="fpcartrecovery-placeholder-item"><code>{{logo_html}}</code><span><?php echo esc_html__('Logo', 'fp-cartrecovery'); ?></span></div>
+                                <div class="fpcartrecovery-placeholder-item"><code>{{primary_color}}</code><span><?php echo esc_html__('Colore primario', 'fp-cartrecovery'); ?></span></div>
+                                <div class="fpcartrecovery-placeholder-item"><code>{{accent_color}}</code><span><?php echo esc_html__('Colore accent', 'fp-cartrecovery'); ?></span></div>
+                            </div>
+                        </details>
+
+                        <div class="fpcartrecovery-email-section fpcartrecovery-email-templates">
+                            <h3 class="fpcartrecovery-email-section-title"><span class="dashicons dashicons-edit"></span> <?php echo esc_html__('Template email', 'fp-cartrecovery'); ?></h3>
+                            <div class="fpcartrecovery-email-tabs">
+                                <div class="fpcartrecovery-email-tab fpcartrecovery-email-tab-active">
+                                    <h4><?php echo esc_html__('1ª email', 'fp-cartrecovery'); ?></h4>
+                                    <div class="fpcartrecovery-field">
+                                        <label><?php echo esc_html__('Oggetto', 'fp-cartrecovery'); ?></label>
+                                        <input type="text" name="email_subject" value="<?php echo esc_attr($data['email_subject'] ?? ''); ?>" placeholder="<?php echo esc_attr__('Hai dimenticato qualcosa nel carrello', 'fp-cartrecovery'); ?>">
+                                    </div>
+                                    <div class="fpcartrecovery-field">
+                                        <label><?php echo esc_html__('Corpo (HTML)', 'fp-cartrecovery'); ?></label>
+                                        <textarea name="email_body" rows="5" placeholder="<?php echo esc_attr__('Vuoto = template default', 'fp-cartrecovery'); ?>"><?php echo esc_textarea($data['email_body'] ?? ''); ?></textarea>
+                                    </div>
+                                </div>
+                                <div class="fpcartrecovery-email-tab">
+                                    <h4><?php echo esc_html__('2ª email', 'fp-cartrecovery'); ?></h4>
+                                    <div class="fpcartrecovery-field">
+                                        <label><?php echo esc_html__('Oggetto', 'fp-cartrecovery'); ?></label>
+                                        <input type="text" name="email_subject_2" value="<?php echo esc_attr($data['email_subject_2'] ?? ''); ?>" placeholder="<?php echo esc_attr__('Il tuo carrello ti aspetta ancora', 'fp-cartrecovery'); ?>">
+                                        <span class="fpcartrecovery-hint"><?php echo esc_html__('Vuoto = uguale alla 1ª', 'fp-cartrecovery'); ?></span>
+                                    </div>
+                                    <div class="fpcartrecovery-field">
+                                        <label><?php echo esc_html__('Corpo (HTML)', 'fp-cartrecovery'); ?></label>
+                                        <textarea name="email_body_2" rows="5"><?php echo esc_textarea($data['email_body_2'] ?? ''); ?></textarea>
+                                    </div>
+                                </div>
+                                <div class="fpcartrecovery-email-tab fpcartrecovery-third-email"<?php echo empty($data['third_reminder_enabled']) ? ' style="display:none"' : ''; ?>>
+                                    <h4><?php echo esc_html__('3ª email', 'fp-cartrecovery'); ?></h4>
+                                    <div class="fpcartrecovery-field">
+                                        <label><?php echo esc_html__('Oggetto', 'fp-cartrecovery'); ?></label>
+                                        <input type="text" name="email_subject_3" value="<?php echo esc_attr($data['email_subject_3'] ?? ''); ?>">
+                                    </div>
+                                    <div class="fpcartrecovery-field">
+                                        <label><?php echo esc_html__('Corpo (HTML)', 'fp-cartrecovery'); ?></label>
+                                        <textarea name="email_body_3" rows="5"><?php echo esc_textarea($data['email_body_3'] ?? ''); ?></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="fpcartrecovery-email-section fpcartrecovery-email-extras">
+                            <h3 class="fpcartrecovery-email-section-title"><span class="dashicons dashicons-admin-settings"></span> <?php echo esc_html__('Altro', 'fp-cartrecovery'); ?></h3>
                             <div class="fpcartrecovery-field">
-                                <label><?php echo esc_html__('Colore primario', 'fp-cartrecovery'); ?></label>
-                                <input type="text" name="email_primary_color" value="<?php echo esc_attr($data['email_primary_color'] ?? '#667eea'); ?>" class="small-text" placeholder="#667eea" maxlength="7" style="width:100px;">
-                            </div>
-                            <div class="fpcartrecovery-field">
-                                <label><?php echo esc_html__('Colore accent', 'fp-cartrecovery'); ?></label>
-                                <input type="text" name="email_accent_color" value="<?php echo esc_attr($data['email_accent_color'] ?? '#764ba2'); ?>" class="small-text" placeholder="#764ba2" maxlength="7" style="width:100px;">
-                            </div>
-                            <div class="fpcartrecovery-field fpcartrecovery-field-full">
-                                <label><?php echo esc_html__('Pagina unsubscribe', 'fp-cartrecovery'); ?></label>
+                                <label><?php echo esc_html__('Pagina dopo disiscrizione', 'fp-cartrecovery'); ?></label>
                                 <?php
                                 wp_dropdown_pages([
                                     'name' => 'unsubscribe_page_id',
                                     'selected' => (int) ($data['unsubscribe_page_id'] ?? 0),
-                                    'show_option_none' => __('— Nessuna (usa homepage)', 'fp-cartrecovery'),
+                                    'show_option_none' => __('— Homepage', 'fp-cartrecovery'),
                                     'option_none_value' => '0',
                                 ]);
                                 ?>
-                                <span class="fpcartrecovery-hint"><?php echo esc_html__('Pagina di destinazione dopo disiscrizione. Il link {{unsubscribe_url}} funziona comunque.', 'fp-cartrecovery'); ?></span>
                             </div>
                         </div>
-                        <div class="fpcartrecovery-fields-grid" style="margin-top:20px;padding-top:20px;border-top:1px solid #e5e7eb;">
+
+                        <div class="fpcartrecovery-fields-grid fpcartrecovery-exclude-section" style="margin-top:20px;padding-top:20px;border-top:1px solid var(--fpdms-border-light);">
                             <div class="fpcartrecovery-field fpcartrecovery-field-full">
                                 <label><?php echo esc_html__('Escludi prodotti (ID)', 'fp-cartrecovery'); ?></label>
-                                <input type="text" name="exclude_product_ids" value="<?php echo esc_attr(is_array($data['exclude_product_ids'] ?? null) ? implode(',', array_map('absint', $data['exclude_product_ids'])) : ($data['exclude_product_ids'] ?? '')); ?>" class="regular-text" placeholder="123, 456">
-                                <span class="fpcartrecovery-hint"><?php echo esc_html__('ID prodotti separati da virgola. Non tracciare carrelli che contengono solo questi.', 'fp-cartrecovery'); ?></span>
+                                <input type="text" name="exclude_product_ids" value="<?php echo esc_attr(is_array($data['exclude_product_ids'] ?? null) ? implode(', ', array_map('absint', $data['exclude_product_ids'])) : ($data['exclude_product_ids'] ?? '')); ?>" placeholder="123, 456">
                             </div>
                             <div class="fpcartrecovery-field fpcartrecovery-field-full">
                                 <label><?php echo esc_html__('Escludi categorie (ID)', 'fp-cartrecovery'); ?></label>
-                                <input type="text" name="exclude_category_ids" value="<?php echo esc_attr(is_array($data['exclude_category_ids'] ?? null) ? implode(',', array_map('absint', $data['exclude_category_ids'])) : ($data['exclude_category_ids'] ?? '')); ?>" class="regular-text" placeholder="5, 12">
-                                <span class="fpcartrecovery-hint"><?php echo esc_html__('ID categorie prodotto separati da virgola.', 'fp-cartrecovery'); ?></span>
+                                <input type="text" name="exclude_category_ids" value="<?php echo esc_attr(is_array($data['exclude_category_ids'] ?? null) ? implode(', ', array_map('absint', $data['exclude_category_ids'])) : ($data['exclude_category_ids'] ?? '')); ?>" placeholder="5, 12">
                             </div>
                         </div>
                     </div>

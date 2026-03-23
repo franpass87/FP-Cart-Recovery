@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.1] - 2025-03-23
+
+### Changed
+
+- **Estetica sezione Email** nelle Impostazioni: sezioni separate (Invio, Aspetto, Mittente, Template), pill per provider, anteprima gradiente colori, color picker nativo, placeholder in griglia, tab per 1ª/2ª/3ª email.
+
 ## [1.2.0] - 2025-03-23
 
 ### Added
