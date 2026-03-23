@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.1] - 2025-03-23
+
+### Fixed
+
+- Non invia più email di recupero per carrelli che contengono prodotti FP Experiences (esperienze o gift voucher). FP Experiences gestisce il recupero direttamente.
+
 ## [1.0.0] - 2025-03-23
 
 ### Added
