@@ -102,12 +102,30 @@ final class CartTracker {
 
         if (defined('FP_TRACKING_VERSION')) {
             $items = $this->build_ga4_items_from_cart();
-            do_action('fp_tracking_event', 'cart_abandoned', [
+            $params = [
                 'value'    => $cart_total,
                 'currency' => $currency,
                 'items'    => $items,
                 'event_id' => 'fp_cartrecovery_' . $session_key . '_' . time(),
-            ]);
+            ];
+            $email_for_tracking = $email;
+            if ($email_for_tracking === '' && $user_id === 0) {
+                $existing = $this->repository->find_by_session_or_user($session_key, $user_id);
+                $email_for_tracking = isset($existing['email']) ? (string) $existing['email'] : '';
+            }
+            if ($user_id > 0) {
+                $user = get_userdata($user_id);
+                if ($user instanceof \WP_User && $user->user_email !== '') {
+                    $params['user_data'] = [
+                        'em' => $user->user_email,
+                        'fn' => $user->first_name ?? '',
+                        'ln' => $user->last_name ?? '',
+                    ];
+                }
+            } elseif ($email_for_tracking !== '') {
+                $params['user_data'] = ['em' => $email_for_tracking];
+            }
+            do_action('fp_tracking_event', 'cart_abandoned', $params);
         }
     }
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.2.2] - 2026-03-23
+### Changed
+- Evento `cart_abandoned` (fp_tracking_event): aggiunto `user_data` (email, nome, cognome) per Brevo e Meta CAPI quando disponibile (utenti loggati o guest con email catturata al checkout).
+
 ## [1.2.1] - 2025-03-23
 
 ### Changed
