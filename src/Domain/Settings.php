@@ -23,6 +23,9 @@ final class Settings {
         'email_body_2'          => '',
         'from_name'             => '',
         'from_email'            => '',
+        'email_logo_url'        => '',
+        'email_primary_color'   => '#667eea',
+        'email_accent_color'    => '#764ba2',
     ];
 
     private array $data;

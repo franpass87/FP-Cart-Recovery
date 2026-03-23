@@ -139,6 +139,10 @@ final class Plugin {
             return;
         }
 
+        if ($page === 'fp_cartrecovery_settings') {
+            wp_enqueue_media();
+        }
+
         wp_enqueue_style(
             'fp-cartrecovery-admin',
             FP_CARTRECOVERY_URL . 'assets/css/admin.css',
@@ -160,6 +164,8 @@ final class Plugin {
             'i18n'    => [
                 'confirmDelete' => __('Eliminare questo carrello abbandonato?', 'fp-cartrecovery'),
                 'copied'        => __('Link copiato negli appunti.', 'fp-cartrecovery'),
+                'selectLogo'    => __('Seleziona logo', 'fp-cartrecovery'),
+                'useImage'      => __('Usa questa immagine', 'fp-cartrecovery'),
             ],
         ]);
     }

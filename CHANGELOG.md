@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.6] - 2025-03-23
+
+### Added
+
+- **Logo email**: URL configurabile (Media Library) mostrato nell'header
+- **Colori branding**: primario e accent per header, bottone e link
+- Placeholder `{{logo_html}}`, `{{primary_color}}`, `{{accent_color}}` per template custom
+
 ## [1.0.5] - 2025-03-23
 
 ### Added

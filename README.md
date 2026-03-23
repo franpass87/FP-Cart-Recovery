@@ -49,12 +49,17 @@ Plugin WordPress per il **recupero carrelli abbandonati** WooCommerce in stile F
 - `{{customer_name}}` — Nome utente o "Cliente"
 - `{{cart_items}}` — Lista HTML prodotti nel carrello
 - `{{reminder_number}}` — 1 o 2 (prima/seconda email)
+- `{{logo_html}}` — Immagine logo (se configurata)
+- `{{primary_color}}` — Colore primario (es. #667eea)
+- `{{accent_color}}` — Colore accent (es. #764ba2)
 
 ## Personalizzazione email
 
 - **1ª e 2ª email** separabili: oggetto e corpo personalizzabili per ogni reminder
 - **Mittente**: nome e email configurabili
-- Template default include `{{customer_name}}` e `{{cart_items}}`
+- **Logo**: URL immagine nell'header (Media Library)
+- **Colori**: primario e accent per header, bottone e link
+- Template default include `{{customer_name}}`, `{{cart_items}}`, logo e colori configurabili
 
 ## Autore
 

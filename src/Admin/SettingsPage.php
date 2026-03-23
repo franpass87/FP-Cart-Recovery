@@ -133,6 +133,9 @@ final class SettingsPage {
                                     <tr><td><code>{{customer_name}}</code></td><td><?php echo esc_html__('Nome utente o "Cliente"', 'fp-cartrecovery'); ?></td></tr>
                                     <tr><td><code>{{cart_items}}</code></td><td><?php echo esc_html__('Lista HTML prodotti nel carrello', 'fp-cartrecovery'); ?></td></tr>
                                     <tr><td><code>{{reminder_number}}</code></td><td><?php echo esc_html__('1 o 2 (prima/seconda email)', 'fp-cartrecovery'); ?></td></tr>
+                                    <tr><td><code>{{logo_html}}</code></td><td><?php echo esc_html__('Immagine logo (se configurata)', 'fp-cartrecovery'); ?></td></tr>
+                                    <tr><td><code>{{primary_color}}</code></td><td><?php echo esc_html__('Colore primario (es. #667eea)', 'fp-cartrecovery'); ?></td></tr>
+                                    <tr><td><code>{{accent_color}}</code></td><td><?php echo esc_html__('Colore accent (es. #764ba2)', 'fp-cartrecovery'); ?></td></tr>
                                 </tbody>
                             </table>
                         </details>
@@ -165,6 +168,26 @@ final class SettingsPage {
                                 <span class="fpcartrecovery-hint"><?php echo esc_html__('Vuoto = email admin', 'fp-cartrecovery'); ?></span>
                             </div>
                         </div>
+                        <div class="fpcartrecovery-fields-grid" style="margin-top:20px;padding-top:20px;border-top:1px solid #e5e7eb;">
+                            <div class="fpcartrecovery-field fpcartrecovery-field-full">
+                                <label><?php echo esc_html__('Logo email', 'fp-cartrecovery'); ?></label>
+                                <div style="display:flex;gap:8px;align-items:center;">
+                                    <input type="url" id="fpcartrecovery-logo-url" name="email_logo_url" value="<?php echo esc_attr($data['email_logo_url'] ?? ''); ?>" class="large-text" placeholder="https://...">
+                                    <button type="button" id="fpcartrecovery-logo-upload" class="fpcartrecovery-btn fpcartrecovery-btn-secondary" style="white-space:nowrap;">
+                                        <?php echo esc_html__('Seleziona da Media', 'fp-cartrecovery'); ?>
+                                    </button>
+                                </div>
+                                <span class="fpcartrecovery-hint"><?php echo esc_html__('Logo mostrato nell\'header delle email (max altezza 60px). Vuoto = nessun logo.', 'fp-cartrecovery'); ?></span>
+                            </div>
+                            <div class="fpcartrecovery-field">
+                                <label><?php echo esc_html__('Colore primario', 'fp-cartrecovery'); ?></label>
+                                <input type="text" name="email_primary_color" value="<?php echo esc_attr($data['email_primary_color'] ?? '#667eea'); ?>" class="small-text" placeholder="#667eea" maxlength="7" style="width:100px;">
+                            </div>
+                            <div class="fpcartrecovery-field">
+                                <label><?php echo esc_html__('Colore accent', 'fp-cartrecovery'); ?></label>
+                                <input type="text" name="email_accent_color" value="<?php echo esc_attr($data['email_accent_color'] ?? '#764ba2'); ?>" class="small-text" placeholder="#764ba2" maxlength="7" style="width:100px;">
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -191,6 +214,9 @@ final class SettingsPage {
         $email_body_2 = wp_kses_post(wp_unslash($_POST['email_body_2'] ?? ''));
         $from_name = sanitize_text_field(wp_unslash($_POST['from_name'] ?? ''));
         $from_email = sanitize_email(wp_unslash($_POST['from_email'] ?? ''));
+        $logo_url = esc_url_raw(wp_unslash($_POST['email_logo_url'] ?? ''));
+        $primary_color = $this->sanitize_hex_color(sanitize_text_field(wp_unslash($_POST['email_primary_color'] ?? '#667eea')));
+        $accent_color = $this->sanitize_hex_color(sanitize_text_field(wp_unslash($_POST['email_accent_color'] ?? '#764ba2')));
 
         $this->settings->save([
             'enabled'               => $enabled,
@@ -204,6 +230,9 @@ final class SettingsPage {
             'email_body_2'          => $email_body_2,
             'from_name'             => $from_name,
             'from_email'            => $from_email,
+            'email_logo_url'        => $logo_url,
+            'email_primary_color'   => $primary_color,
+            'email_accent_color'    => $accent_color,
         ]);
 
         add_settings_error(
@@ -212,5 +241,13 @@ final class SettingsPage {
             __('Impostazioni salvate.', 'fp-cartrecovery'),
             'success'
         );
+    }
+
+    private function sanitize_hex_color(string $color): string {
+        $color = trim($color);
+        if (preg_match('/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/', $color)) {
+            return $color;
+        }
+        return '#667eea';
     }
 }

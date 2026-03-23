@@ -76,6 +76,13 @@ final class EmailScheduler {
         $customer_name = $this->get_customer_name($cart);
         $cart_items_html = $this->build_cart_items_html($cart);
 
+        $logo_url = esc_url_raw($this->settings->get('email_logo_url') ?: '');
+        $logo_html = $logo_url !== ''
+            ? '<img src="' . esc_url($logo_url) . '" alt="' . esc_attr($shop_name) . '" style="max-height:60px;width:auto;display:block;margin:0 auto 16px;" />'
+            : '';
+        $primary_color = $this->sanitize_hex_color($this->settings->get('email_primary_color') ?: '#667eea');
+        $accent_color = $this->sanitize_hex_color($this->settings->get('email_accent_color') ?: '#764ba2');
+
         $placeholders = [
             '{{recovery_link}}',
             '{{cart_total}}',
@@ -83,6 +90,9 @@ final class EmailScheduler {
             '{{customer_name}}',
             '{{cart_items}}',
             '{{reminder_number}}',
+            '{{logo_html}}',
+            '{{primary_color}}',
+            '{{accent_color}}',
         ];
         $values = [
             $recovery_url,
@@ -91,6 +101,9 @@ final class EmailScheduler {
             $customer_name,
             $cart_items_html,
             (string) $reminder_number,
+            $logo_html,
+            $primary_color,
+            $accent_color,
         ];
 
         $body = str_replace($placeholders, $values, $body_template);
@@ -237,6 +250,14 @@ final class EmailScheduler {
         }
 
         return $lines === [] ? '' : '<ul style="margin:0 0 16px;padding-left:20px;">' . implode('', $lines) . '</ul>';
+    }
+
+    private function sanitize_hex_color(string $color): string {
+        $color = trim($color);
+        if (preg_match('/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/', $color)) {
+            return $color;
+        }
+        return '#667eea';
     }
 
     private function get_default_body(): string {
