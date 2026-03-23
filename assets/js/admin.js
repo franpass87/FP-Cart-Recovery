@@ -76,5 +76,31 @@
                 alert('Errore di connessione.');
             }).always(function () { $btn.prop('disabled', false); });
         });
+
+        // Toggle campi wp_mail quando cambia provider
+        $('input[name="email_provider"]').on('change', function () {
+            const isWp = $(this).val() === 'wp';
+            $('.fpcartrecovery-wp-mail-only').toggle(isWp);
+        });
+
+        // Anteprima email
+        $('#fpcartrecovery-preview-email').on('click', function () {
+            const $btn = $(this);
+            $btn.prop('disabled', true);
+            $.post(fpCartRecoveryConfig.ajaxUrl, {
+                action: 'fp_cartrecovery_preview_email',
+                nonce: fpCartRecoveryConfig.nonce
+            }).done(function (r) {
+                if (r.success && r.data && r.data.html) {
+                    const w = window.open('', '_blank', 'width=680,height=700,scrollbars=yes');
+                    w.document.write('<html><head><meta charset="UTF-8"><title>' + (fpCartRecoveryConfig?.i18n?.previewEmail || 'Anteprima') + '</title></head><body style="margin:0;padding:16px;background:#f5f5f5;">' + r.data.html + '</body></html>');
+                    w.document.close();
+                } else {
+                    alert(r.data?.message || 'Errore anteprima.');
+                }
+            }).fail(function () {
+                alert('Errore di connessione.');
+            }).always(function () { $btn.prop('disabled', false); });
+        });
     });
 })(jQuery);

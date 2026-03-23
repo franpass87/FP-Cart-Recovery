@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.1] - 2025-03-23
+
+### Added
+
+- **Reply-To** configurabile per wp_mail (campo opzionale, visibile solo con provider WordPress)
+- **Anteprima email**: pulsante che apre nuova finestra con HTML renderizzato e placeholder sostituiti
+- Suggerimento wp_mail su plugin SMTP per deliverability
+- Toggle visività campi wp_mail quando si cambia provider
+
 ## [1.1.0] - 2025-03-23
 
 ### Added

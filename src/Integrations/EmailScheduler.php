@@ -137,6 +137,32 @@ final class EmailScheduler {
     }
 
     /**
+     * Restituisce HTML email con placeholder sostituiti (per anteprima).
+     */
+    public function get_preview_html(array $cart): string {
+        $body_template = $this->settings->get('email_body') ?: $this->get_default_body();
+        $customer_name = $this->get_customer_name($cart);
+        $logo_url = esc_url_raw($this->settings->get('email_logo_url') ?: '');
+        $shop_name = get_bloginfo('name');
+        $placeholders = [
+            '{{recovery_link}}', '{{cart_total}}', '{{shop_name}}', '{{customer_name}}',
+            '{{cart_items}}', '{{reminder_number}}', '{{logo_html}}', '{{primary_color}}', '{{accent_color}}',
+        ];
+        $values = [
+            wc_get_cart_url(),
+            wc_price(99.90, ['currency' => $cart['currency'] ?? 'EUR']),
+            $shop_name,
+            $customer_name,
+            '<ul style="margin:0 0 16px;padding-left:20px;"><li>1 &times; ' . esc_html__('Prodotto di esempio', 'fp-cartrecovery') . '</li></ul>',
+            '1',
+            $logo_url !== '' ? '<img src="' . esc_url($logo_url) . '" alt="' . esc_attr($shop_name) . '" style="max-height:60px;width:auto;display:block;margin:0 auto 16px;" />' : '',
+            \FP\CartRecovery\Utils\ColorHelper::sanitize_hex($this->settings->get('email_primary_color') ?: '#667eea'),
+            \FP\CartRecovery\Utils\ColorHelper::sanitize_hex($this->settings->get('email_accent_color') ?: '#764ba2'),
+        ];
+        return str_replace($placeholders, $values, $body_template);
+    }
+
+    /**
      * Invia email di prova (usa placeholder e provider configurato, senza evento tracking).
      */
     public function send_test_email(string $to, string $subject, string $body_template, array $cart): bool {
@@ -153,10 +179,12 @@ final class EmailScheduler {
     private function send_via_wp(string $to, string $subject, string $body, string $from_name, string $from_email): bool {
         $subject = str_replace(["\r", "\n"], '', $subject);
 
+        $reply_to = $this->settings->get('reply_to_email') ?: $from_email;
+        $reply_to = is_email($reply_to) ? $reply_to : $from_email;
         $headers = [
             'Content-Type: text/html; charset=UTF-8',
             'From: ' . $from_name . ' <' . $from_email . '>',
-            'Reply-To: ' . $from_email,
+            'Reply-To: ' . $reply_to,
         ];
         $headers = apply_filters('fp_cartrecovery_wp_mail_headers', $headers, $to, $subject);
 

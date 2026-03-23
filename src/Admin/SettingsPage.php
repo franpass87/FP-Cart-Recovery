@@ -178,6 +178,17 @@ final class SettingsPage {
                                 <input type="email" name="from_email" value="<?php echo esc_attr($data['from_email'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr(get_option('admin_email')); ?>">
                                 <span class="fpcartrecovery-hint"><?php echo esc_html__('Vuoto = email admin', 'fp-cartrecovery'); ?></span>
                             </div>
+                            <div class="fpcartrecovery-field fpcartrecovery-wp-mail-only"<?php echo ($data['email_provider'] ?? 'wp') !== 'wp' ? ' style="display:none"' : ''; ?>>
+                                <label><?php echo esc_html__('Reply-To (solo wp_mail)', 'fp-cartrecovery'); ?></label>
+                                <input type="email" name="reply_to_email" value="<?php echo esc_attr($data['reply_to_email'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr(get_option('admin_email')); ?>">
+                                <span class="fpcartrecovery-hint"><?php echo esc_html__('Vuoto = uguale a email mittente', 'fp-cartrecovery'); ?></span>
+                            </div>
+                        </div>
+                        <div class="fpcartrecovery-wp-mail-notice fpcartrecovery-wp-mail-only" style="margin-top:16px;padding:12px 16px;background:#f0f9ff;border-left:4px solid #0ea5e9;border-radius:4px;<?php echo ($data['email_provider'] ?? 'wp') !== 'wp' ? ' display:none' : ''; ?>">
+                            <p style="margin:0;font-size:13px;color:#0c4a6e;">
+                                <strong><?php echo esc_html__('Suggerimento wp_mail:', 'fp-cartrecovery'); ?></strong>
+                                <?php echo esc_html__('Per una deliverability migliore, considera un plugin SMTP (es. WP Mail SMTP, FluentSMTP) o un servizio di invio.', 'fp-cartrecovery'); ?>
+                            </p>
                         </div>
                         <div class="fpcartrecovery-fields-grid" style="margin-top:20px;padding-top:20px;border-top:1px solid #e5e7eb;">
                             <div class="fpcartrecovery-field fpcartrecovery-field-full">
@@ -211,6 +222,10 @@ final class SettingsPage {
                         <span class="dashicons dashicons-email-alt"></span>
                         <?php echo esc_html__('Invia email di prova', 'fp-cartrecovery'); ?>
                     </button>
+                    <button type="button" id="fpcartrecovery-preview-email" class="fpcartrecovery-btn fpcartrecovery-btn-secondary" style="margin-left:8px;" title="<?php echo esc_attr__('Usa le impostazioni salvate. Salva prima per vedere le modifiche.', 'fp-cartrecovery'); ?>">
+                        <span class="dashicons dashicons-visibility"></span>
+                        <?php echo esc_html__('Anteprima email', 'fp-cartrecovery'); ?>
+                    </button>
                 </p>
             </form>
         </div>
@@ -231,6 +246,7 @@ final class SettingsPage {
         $email_body_2 = wp_kses_post(wp_unslash($_POST['email_body_2'] ?? ''));
         $from_name = sanitize_text_field(wp_unslash($_POST['from_name'] ?? ''));
         $from_email = sanitize_email(wp_unslash($_POST['from_email'] ?? ''));
+        $reply_to = sanitize_email(wp_unslash($_POST['reply_to_email'] ?? ''));
         $logo_url = esc_url_raw(wp_unslash($_POST['email_logo_url'] ?? ''));
         $primary_color = ColorHelper::sanitize_hex(sanitize_text_field(wp_unslash($_POST['email_primary_color'] ?? '#667eea')));
         $accent_color = ColorHelper::sanitize_hex(sanitize_text_field(wp_unslash($_POST['email_accent_color'] ?? '#764ba2')));
@@ -249,6 +265,7 @@ final class SettingsPage {
             'email_body_2'          => $email_body_2,
             'from_name'             => $from_name,
             'from_email'            => $from_email,
+            'reply_to_email'        => $reply_to,
             'email_logo_url'        => $logo_url,
             'email_primary_color'   => $primary_color,
             'email_accent_color'    => $accent_color,
