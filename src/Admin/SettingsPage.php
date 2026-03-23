@@ -186,8 +186,18 @@ final class SettingsPage {
                         </div>
                         <div class="fpcartrecovery-wp-mail-notice fpcartrecovery-wp-mail-only" style="margin-top:16px;padding:12px 16px;background:#f0f9ff;border-left:4px solid #0ea5e9;border-radius:4px;<?php echo ($data['email_provider'] ?? 'wp') !== 'wp' ? ' display:none' : ''; ?>">
                             <p style="margin:0;font-size:13px;color:#0c4a6e;">
+                                <?php if ( defined( 'FP_FPMAIL_VERSION' ) ) : ?>
+                                <strong><?php echo esc_html__('FP Mail SMTP è attivo:', 'fp-cartrecovery'); ?></strong>
+                                <?php
+                                printf(
+                                    esc_html__( ' centralizza la configurazione SMTP per tutti i plugin FP. Le email wp_mail passano da FP Mail SMTP. Configura in %s.', 'fp-cartrecovery' ),
+                                    '<a href="' . esc_url( admin_url( 'admin.php?page=fp-fpmail' ) ) . '">FP Mail SMTP → Impostazioni</a>'
+                                );
+                                ?>
+                                <?php else : ?>
                                 <strong><?php echo esc_html__('Suggerimento wp_mail:', 'fp-cartrecovery'); ?></strong>
-                                <?php echo esc_html__('Per una deliverability migliore, considera un plugin SMTP (es. WP Mail SMTP, FluentSMTP) o un servizio di invio.', 'fp-cartrecovery'); ?>
+                                <?php echo esc_html__('Per una deliverability migliore, considera FP Mail SMTP (centralizza SMTP per tutti i plugin FP) o un altro plugin SMTP.', 'fp-cartrecovery'); ?>
+                                <?php endif; ?>
                             </p>
                         </div>
                         <div class="fpcartrecovery-fields-grid" style="margin-top:20px;padding-top:20px;border-top:1px solid #e5e7eb;">

@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.1.2] - 2026-03-23
+
+### Added
+- Notice in sezione email: se FP Mail SMTP è installato, avvisa che centralizza SMTP; altrimenti suggerisce FP Mail SMTP.
+
 ## [1.1.1] - 2025-03-23
 
 ### Added
