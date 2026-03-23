@@ -94,6 +94,83 @@ final class CartTracker {
         ]);
 
         do_action('fp_cartrecovery_cart_abandoned', $session_key, $user_id, $cart_total);
+
+        if (defined('FP_TRACKING_VERSION') && !$this->cart_has_fp_experiences($cart_for_session)) {
+            $items = $this->build_ga4_items_from_cart();
+            do_action('fp_tracking_event', 'cart_abandoned', [
+                'value'    => $cart_total,
+                'currency' => $currency,
+                'items'    => $items,
+                'event_id' => 'fp_cartrecovery_' . $session_key . '_' . time(),
+            ]);
+        }
+    }
+
+    /**
+     * Verifica se il carrello contiene prodotti FP Experiences (non emettere tracking).
+     *
+     * @param array<string, array<string, mixed>> $cart_items
+     */
+    private function cart_has_fp_experiences(array $cart_items): bool {
+        if (!defined('FP_EXP_VERSION')) {
+            return false;
+        }
+        $exp_product_id = (int) get_option('fp_exp_wc_product_id', 0);
+        $gift_product_id = (int) get_option('fp_exp_gift_product_id', 0);
+
+        foreach ($cart_items as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+            $product_id = absint($item['product_id'] ?? 0);
+            $variation_id = absint($item['variation_id'] ?? 0);
+            $check_id = $variation_id > 0 ? $variation_id : $product_id;
+
+            if ($check_id > 0 && ($check_id === $exp_product_id || $check_id === $gift_product_id)) {
+                return true;
+            }
+            if (!empty($item['fp_exp_tickets']) || !empty($item['fp_exp_is_gift']) || !empty($item['gift_voucher']) || !empty($item['_fp_experience_id'])) {
+                return true;
+            }
+            if ($product_id > 0 && 'yes' === get_post_meta($product_id, '_fp_exp_is_gift_product', true)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Costruisce array items in formato GA4 per fp_tracking_event.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function build_ga4_items_from_cart(): array {
+        if (!function_exists('WC') || !WC()->cart) {
+            return [];
+        }
+        $items = [];
+        foreach (WC()->cart->get_cart() as $item) {
+            $product = $item['data'] ?? null;
+            if (!$product instanceof \WC_Product) {
+                continue;
+            }
+            $product_id = $product->get_id();
+            $categories = get_the_terms($product_id, 'product_cat');
+            $primary_cat = '';
+            if (is_array($categories) && !empty($categories)) {
+                $primary = reset($categories);
+                $primary_cat = $primary instanceof \WP_Term ? $primary->name : '';
+            }
+            $items[] = [
+                'item_id'       => (string) $product_id,
+                'item_name'     => $product->get_name(),
+                'price'         => (float) $product->get_price(),
+                'quantity'      => (int) ($item['quantity'] ?? 1),
+                'item_category' => $primary_cat,
+                'item_brand'    => '',
+            ];
+        }
+        return $items;
     }
 
     /**

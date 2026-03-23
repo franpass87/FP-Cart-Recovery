@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.2] - 2025-03-23
+
+### Added
+
+- Invio evento `cart_abandoned` a FP Tracking (`fp_tracking_event`) quando un carrello viene salvato come abbandonato (value, currency, items GA4). Esclusi i carrelli FP Experiences.
+
 ## [1.0.1] - 2025-03-23
 
 ### Fixed

@@ -8,7 +8,7 @@ Plugin WordPress per il **recupero carrelli abbandonati** WooCommerce in stile F
 - **Email di richiamo**: invio automatico di reminder dopo 2h e 24h (configurabili)
 - **Link di recovery**: URL univoco per ripristinare il carrello con un click
 - **Dashboard admin**: statistiche e elenco carrelli abbandonati/recuperati
-- **Integrazione FP Tracking**: evento `cart_recovery` su recupero
+- **Integrazione FP Tracking**: eventi `cart_abandoned` (al salvataggio carrello) e `cart_recovery` (al recupero)
 
 ## Requisiti
 
@@ -35,6 +35,8 @@ Plugin WordPress per il **recupero carrelli abbandonati** WooCommerce in stile F
 |---------------|-------------|
 | `fp_cartrecovery_cart_abandoned` | Eseguito quando un carrello viene salvato come abbandonato |
 | `fp_cartrecovery_cart_recovered` | Eseguito quando un carrello viene recuperato tramite link |
+| `fp_tracking_event` (cart_abandoned) | Emesso con value, currency, items (GA4) quando il carrello viene salvato come abbandonato |
+| `fp_tracking_event` (cart_recovery) | Emesso con value, currency quando il carrello viene recuperato tramite link |
 | `fp_cartrecovery_email_subject` | Filtra l'oggetto email |
 | `fp_cartrecovery_email_body` | Filtra il corpo email |
 
