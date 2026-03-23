@@ -1,16 +1,23 @@
 # Changelog
 
+## [1.0.3] - 2025-03-23
+
+### Changed
+
+- **Centralizzazione**: il recupero carrelli ora include anche FP Experiences (esperienze e gift voucher). Email, tracking e recovery link gestiti tutti da FP Cart Recovery.
+- Ripristino carrello: supporto per cart_item_data custom (fp_exp_tickets, fp_exp_slot_id, gift_voucher, ecc.) per ripristinare correttamente i carrelli FP Experiences.
+
 ## [1.0.2] - 2025-03-23
 
 ### Added
 
-- Invio evento `cart_abandoned` a FP Tracking (`fp_tracking_event`) quando un carrello viene salvato come abbandonato (value, currency, items GA4). Esclusi i carrelli FP Experiences.
+- Invio evento `cart_abandoned` a FP Tracking (`fp_tracking_event`) quando un carrello viene salvato come abbandonato (value, currency, items GA4).
 
 ## [1.0.1] - 2025-03-23
 
 ### Fixed
 
-- Non invia più email di recupero per carrelli che contengono prodotti FP Experiences (esperienze o gift voucher). FP Experiences gestisce il recupero direttamente.
+- (Sostituito in 1.0.3) Esclusione FP Experiences dalle email — ora centralizzato, vedi 1.0.3.
 
 ## [1.0.0] - 2025-03-23
 

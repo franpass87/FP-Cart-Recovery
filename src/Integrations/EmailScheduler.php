@@ -42,9 +42,6 @@ final class EmailScheduler {
 
         $carts_first = $this->repository->find_abandoned_for_reminder($first_hours, 1);
         foreach ($carts_first as $cart) {
-            if ($this->cart_has_fp_experiences($cart)) {
-                continue;
-            }
             if ($this->send_email($cart, $subject, $body_template)) {
                 $this->repository->increment_reminder_sent((int) $cart['id']);
                 $sent++;
@@ -53,9 +50,6 @@ final class EmailScheduler {
 
         $carts_second = $this->repository->find_abandoned_for_reminder($second_hours, 2);
         foreach ($carts_second as $cart) {
-            if ($this->cart_has_fp_experiences($cart)) {
-                continue;
-            }
             if ($this->send_email($cart, $subject, $body_template)) {
                 $this->repository->increment_reminder_sent((int) $cart['id']);
                 $sent++;
@@ -65,50 +59,6 @@ final class EmailScheduler {
         if ($sent > 0 && defined('WP_DEBUG') && WP_DEBUG) {
             error_log('[FP-Cart-Recovery] Sent ' . $sent . ' reminder emails');
         }
-    }
-
-    /**
-     * Verifica se il carrello contiene prodotti FP Experiences.
-     * In tal caso non inviare email: FP Experiences gestisce il recupero direttamente.
-     */
-    private function cart_has_fp_experiences(array $cart): bool {
-        if (!defined('FP_EXP_VERSION')) {
-            return false;
-        }
-
-        $content = $cart['cart_content'] ?? '';
-        if ($content === '') {
-            return false;
-        }
-
-        $items = json_decode($content, true);
-        if (!is_array($items)) {
-            return false;
-        }
-
-        $exp_product_id = (int) get_option('fp_exp_wc_product_id', 0);
-        $gift_product_id = (int) get_option('fp_exp_gift_product_id', 0);
-
-        foreach ($items as $item) {
-            if (!is_array($item)) {
-                continue;
-            }
-            $product_id = absint($item['product_id'] ?? 0);
-            $variation_id = absint($item['variation_id'] ?? 0);
-            $check_id = $variation_id > 0 ? $variation_id : $product_id;
-
-            if ($check_id > 0 && ($check_id === $exp_product_id || $check_id === $gift_product_id)) {
-                return true;
-            }
-            if (!empty($item['fp_exp_tickets']) || !empty($item['fp_exp_is_gift']) || !empty($item['gift_voucher']) || !empty($item['_fp_experience_id'])) {
-                return true;
-            }
-            if ($product_id > 0 && 'yes' === get_post_meta($product_id, '_fp_exp_is_gift_product', true)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private function send_email(array $cart, string $subject, string $body_template): bool {

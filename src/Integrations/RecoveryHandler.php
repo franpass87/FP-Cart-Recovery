@@ -48,14 +48,26 @@ final class RecoveryHandler {
 
         WC()->cart->empty_cart(false);
 
+        $reserved_keys = ['product_id', 'variation_id', 'quantity', 'variation', 'data'];
         foreach ($cart_content as $key => $item) {
+            if (!is_array($item)) {
+                continue;
+            }
             $product_id = absint($item['product_id'] ?? 0);
             $quantity = max(1, absint($item['quantity'] ?? 1));
             $variation_id = absint($item['variation_id'] ?? 0);
             $variation = [];
 
-            if ($variation_id > 0 && !empty($item['variation'])) {
-                $variation = array_map('sanitize_text_field', (array) $item['variation']);
+            if ($variation_id > 0 && !empty($item['variation']) && is_array($item['variation'])) {
+                $variation = array_map('sanitize_text_field', $item['variation']);
+            }
+
+            $cart_item_data = [];
+            foreach ($item as $k => $v) {
+                if (in_array($k, $reserved_keys, true) || $v === null) {
+                    continue;
+                }
+                $cart_item_data[$k] = $this->sanitize_cart_item_value($v);
             }
 
             $product = $variation_id > 0 ? wc_get_product($variation_id) : wc_get_product($product_id);
@@ -63,7 +75,7 @@ final class RecoveryHandler {
                 continue;
             }
 
-            WC()->cart->add_to_cart($product_id, $quantity, $variation_id, $variation);
+            WC()->cart->add_to_cart($product_id, $quantity, $variation_id, $variation, $cart_item_data);
         }
 
         $repository->mark_recovered((int) $cart_record['id']);
@@ -81,6 +93,25 @@ final class RecoveryHandler {
 
         wp_safe_redirect(remove_query_arg(self::QUERY_ARG, wc_get_cart_url()));
         exit;
+    }
+
+    /**
+     * Sanitizza un valore per cart_item_data (preserva int, float, array).
+     *
+     * @param mixed $v
+     * @return mixed
+     */
+    private function sanitize_cart_item_value(mixed $v): mixed {
+        if (is_array($v)) {
+            return array_map([$this, 'sanitize_cart_item_value'], $v);
+        }
+        if (is_int($v) || is_float($v)) {
+            return $v;
+        }
+        if (is_numeric($v)) {
+            return strpos((string) $v, '.') !== false ? (float) $v : (int) $v;
+        }
+        return sanitize_text_field((string) $v);
     }
 
     /**

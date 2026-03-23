@@ -4,7 +4,7 @@ Plugin WordPress per il **recupero carrelli abbandonati** WooCommerce in stile F
 
 ## Funzionalità
 
-- **Tracciamento**: salva automaticamente i carrelli con prodotti (utenti loggati e guest)
+- **Tracciamento**: salva automaticamente i carrelli con prodotti (utenti loggati e guest), incluse esperienze e gift voucher FP Experiences
 - **Email di richiamo**: invio automatico di reminder dopo 2h e 24h (configurabili)
 - **Link di recovery**: URL univoco per ripristinare il carrello con un click
 - **Dashboard admin**: statistiche e elenco carrelli abbandonati/recuperati

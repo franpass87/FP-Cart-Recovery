@@ -95,7 +95,7 @@ final class CartTracker {
 
         do_action('fp_cartrecovery_cart_abandoned', $session_key, $user_id, $cart_total);
 
-        if (defined('FP_TRACKING_VERSION') && !$this->cart_has_fp_experiences($cart_for_session)) {
+        if (defined('FP_TRACKING_VERSION')) {
             $items = $this->build_ga4_items_from_cart();
             do_action('fp_tracking_event', 'cart_abandoned', [
                 'value'    => $cart_total,
@@ -104,39 +104,6 @@ final class CartTracker {
                 'event_id' => 'fp_cartrecovery_' . $session_key . '_' . time(),
             ]);
         }
-    }
-
-    /**
-     * Verifica se il carrello contiene prodotti FP Experiences (non emettere tracking).
-     *
-     * @param array<string, array<string, mixed>> $cart_items
-     */
-    private function cart_has_fp_experiences(array $cart_items): bool {
-        if (!defined('FP_EXP_VERSION')) {
-            return false;
-        }
-        $exp_product_id = (int) get_option('fp_exp_wc_product_id', 0);
-        $gift_product_id = (int) get_option('fp_exp_gift_product_id', 0);
-
-        foreach ($cart_items as $item) {
-            if (!is_array($item)) {
-                continue;
-            }
-            $product_id = absint($item['product_id'] ?? 0);
-            $variation_id = absint($item['variation_id'] ?? 0);
-            $check_id = $variation_id > 0 ? $variation_id : $product_id;
-
-            if ($check_id > 0 && ($check_id === $exp_product_id || $check_id === $gift_product_id)) {
-                return true;
-            }
-            if (!empty($item['fp_exp_tickets']) || !empty($item['fp_exp_is_gift']) || !empty($item['gift_voucher']) || !empty($item['_fp_experience_id'])) {
-                return true;
-            }
-            if ($product_id > 0 && 'yes' === get_post_meta($product_id, '_fp_exp_is_gift_product', true)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
