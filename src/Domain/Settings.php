@@ -19,7 +19,10 @@ final class Settings {
         'email_provider'        => 'wp',
         'email_subject'         => '',
         'email_body'            => '',
+        'email_subject_2'       => '',
+        'email_body_2'          => '',
         'from_name'             => '',
+        'from_email'            => '',
     ];
 
     private array $data;

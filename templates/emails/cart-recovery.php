@@ -27,15 +27,16 @@ defined('ABSPATH') || exit;
                             <?php echo esc_html__('Hai dimenticato qualcosa?', 'fp-cartrecovery'); ?>
                         </h1>
                         <p style="margin:12px 0 0;color:rgba(255,255,255,0.9);font-size:14px;">
-                            <?php echo esc_html(sprintf(__('Il tuo carrello da %s ti aspetta.', 'fp-cartrecovery'), '{{cart_total}}')); ?>
+                            <?php echo esc_html(sprintf(__('Ciao %s! Il tuo carrello da %s ti aspetta.', 'fp-cartrecovery'), '{{customer_name}}', '{{cart_total}}')); ?>
                         </p>
                     </td>
                 </tr>
                 <tr>
                     <td style="padding:32px;">
-                        <p style="margin:0 0 24px;color:#1f2937;font-size:16px;line-height:1.6;">
+                        <p style="margin:0 0 16px;color:#1f2937;font-size:16px;line-height:1.6;">
                             <?php echo esc_html__('Hai aggiunto dei prodotti al carrello ma non hai completato l\'acquisto. Clicca il pulsante qui sotto per tornare al carrello e finalizzare l\'ordine.', 'fp-cartrecovery'); ?>
                         </p>
+                        {{cart_items}}
                         <p style="margin:0 0 24px;text-align:center;">
                             <a href="{{recovery_link}}" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;text-decoration:none;font-weight:600;font-size:16px;border-radius:8px;">
                                 <?php echo esc_html__('Riprendi l\'acquisto', 'fp-cartrecovery'); ?>

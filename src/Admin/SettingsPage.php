@@ -123,19 +123,46 @@ final class SettingsPage {
                             </div>
                             <span class="fpcartrecovery-hint"><?php echo esc_html__('Brevo usa le impostazioni di FP Marketing Tracking Layer. Con Brevo viene emesso l\'evento cart_recovery_email_sent a fp_tracking_event.', 'fp-cartrecovery'); ?></span>
                         </div>
-                        <p class="description"><?php echo esc_html__('Placeholder: {{recovery_link}}, {{cart_total}}, {{shop_name}}', 'fp-cartrecovery'); ?></p>
+                        <details class="fpcartrecovery-placeholders" style="margin-bottom:16px">
+                            <summary><?php echo esc_html__('Placeholder disponibili', 'fp-cartrecovery'); ?></summary>
+                            <table class="widefat" style="margin-top:8px">
+                                <tbody>
+                                    <tr><td><code>{{recovery_link}}</code></td><td><?php echo esc_html__('URL per ripristinare il carrello', 'fp-cartrecovery'); ?></td></tr>
+                                    <tr><td><code>{{cart_total}}</code></td><td><?php echo esc_html__('Totale formattato (es. €29,90)', 'fp-cartrecovery'); ?></td></tr>
+                                    <tr><td><code>{{shop_name}}</code></td><td><?php echo esc_html__('Nome del sito', 'fp-cartrecovery'); ?></td></tr>
+                                    <tr><td><code>{{customer_name}}</code></td><td><?php echo esc_html__('Nome utente o "Cliente"', 'fp-cartrecovery'); ?></td></tr>
+                                    <tr><td><code>{{cart_items}}</code></td><td><?php echo esc_html__('Lista HTML prodotti nel carrello', 'fp-cartrecovery'); ?></td></tr>
+                                    <tr><td><code>{{reminder_number}}</code></td><td><?php echo esc_html__('1 o 2 (prima/seconda email)', 'fp-cartrecovery'); ?></td></tr>
+                                </tbody>
+                            </table>
+                        </details>
                         <div class="fpcartrecovery-fields-grid">
                             <div class="fpcartrecovery-field fpcartrecovery-field-full">
-                                <label><?php echo esc_html__('Oggetto email', 'fp-cartrecovery'); ?></label>
+                                <label><?php echo esc_html__('Oggetto 1ª email', 'fp-cartrecovery'); ?></label>
                                 <input type="text" name="email_subject" value="<?php echo esc_attr($data['email_subject'] ?? ''); ?>" class="large-text" placeholder="<?php echo esc_attr__('Hai dimenticato qualcosa nel carrello', 'fp-cartrecovery'); ?>">
                             </div>
                             <div class="fpcartrecovery-field fpcartrecovery-field-full">
+                                <label><?php echo esc_html__('Corpo 1ª email (HTML, vuoto = template default)', 'fp-cartrecovery'); ?></label>
+                                <textarea name="email_body" rows="6" class="large-text"><?php echo esc_textarea($data['email_body'] ?? ''); ?></textarea>
+                            </div>
+                            <div class="fpcartrecovery-field fpcartrecovery-field-full">
+                                <label><?php echo esc_html__('Oggetto 2ª email', 'fp-cartrecovery'); ?></label>
+                                <input type="text" name="email_subject_2" value="<?php echo esc_attr($data['email_subject_2'] ?? ''); ?>" class="large-text" placeholder="<?php echo esc_attr__('Il tuo carrello ti aspetta ancora', 'fp-cartrecovery'); ?>">
+                                <span class="fpcartrecovery-hint"><?php echo esc_html__('Vuoto = uguale alla 1ª', 'fp-cartrecovery'); ?></span>
+                            </div>
+                            <div class="fpcartrecovery-field fpcartrecovery-field-full">
+                                <label><?php echo esc_html__('Corpo 2ª email', 'fp-cartrecovery'); ?></label>
+                                <textarea name="email_body_2" rows="6" class="large-text"><?php echo esc_textarea($data['email_body_2'] ?? ''); ?></textarea>
+                                <span class="fpcartrecovery-hint"><?php echo esc_html__('Vuoto = uguale alla 1ª', 'fp-cartrecovery'); ?></span>
+                            </div>
+                            <div class="fpcartrecovery-field">
                                 <label><?php echo esc_html__('Nome mittente', 'fp-cartrecovery'); ?></label>
                                 <input type="text" name="from_name" value="<?php echo esc_attr($data['from_name'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr(get_bloginfo('name')); ?>">
                             </div>
-                            <div class="fpcartrecovery-field fpcartrecovery-field-full">
-                                <label><?php echo esc_html__('Corpo email (HTML, vuoto = template default)', 'fp-cartrecovery'); ?></label>
-                                <textarea name="email_body" rows="8" class="large-text"><?php echo esc_textarea($data['email_body'] ?? ''); ?></textarea>
+                            <div class="fpcartrecovery-field">
+                                <label><?php echo esc_html__('Email mittente', 'fp-cartrecovery'); ?></label>
+                                <input type="email" name="from_email" value="<?php echo esc_attr($data['from_email'] ?? ''); ?>" class="regular-text" placeholder="<?php echo esc_attr(get_option('admin_email')); ?>">
+                                <span class="fpcartrecovery-hint"><?php echo esc_html__('Vuoto = email admin', 'fp-cartrecovery'); ?></span>
                             </div>
                         </div>
                     </div>
@@ -160,7 +187,10 @@ final class SettingsPage {
         $second_hours = max(1, min(168, absint($_POST['second_reminder_hours'] ?? 24)));
         $email_subject = sanitize_text_field(wp_unslash($_POST['email_subject'] ?? ''));
         $email_body = wp_kses_post(wp_unslash($_POST['email_body'] ?? ''));
+        $email_subject_2 = sanitize_text_field(wp_unslash($_POST['email_subject_2'] ?? ''));
+        $email_body_2 = wp_kses_post(wp_unslash($_POST['email_body_2'] ?? ''));
         $from_name = sanitize_text_field(wp_unslash($_POST['from_name'] ?? ''));
+        $from_email = sanitize_email(wp_unslash($_POST['from_email'] ?? ''));
 
         $this->settings->save([
             'enabled'               => $enabled,
@@ -170,7 +200,10 @@ final class SettingsPage {
             'second_reminder_hours' => $second_hours,
             'email_subject'         => $email_subject,
             'email_body'            => $email_body,
+            'email_subject_2'       => $email_subject_2,
+            'email_body_2'          => $email_body_2,
             'from_name'             => $from_name,
+            'from_email'            => $from_email,
         ]);
 
         add_settings_error(

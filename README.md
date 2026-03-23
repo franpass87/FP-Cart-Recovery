@@ -46,6 +46,15 @@ Plugin WordPress per il **recupero carrelli abbandonati** WooCommerce in stile F
 - `{{recovery_link}}` — URL per ripristinare il carrello
 - `{{cart_total}}` — Totale formattato (es. €29,90)
 - `{{shop_name}}` — Nome del sito
+- `{{customer_name}}` — Nome utente o "Cliente"
+- `{{cart_items}}` — Lista HTML prodotti nel carrello
+- `{{reminder_number}}` — 1 o 2 (prima/seconda email)
+
+## Personalizzazione email
+
+- **1ª e 2ª email** separabili: oggetto e corpo personalizzabili per ogni reminder
+- **Mittente**: nome e email configurabili
+- Template default include `{{customer_name}}` e `{{cart_items}}`
 
 ## Autore
 

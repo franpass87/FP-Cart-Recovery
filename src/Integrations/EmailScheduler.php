@@ -40,9 +40,12 @@ final class EmailScheduler {
 
         $sent = 0;
 
+        $subject_2 = $this->settings->get('email_subject_2') ?: $subject;
+        $body_template_2 = $this->settings->get('email_body_2') ?: $body_template;
+
         $carts_first = $this->repository->find_abandoned_for_reminder($first_hours, 1);
         foreach ($carts_first as $cart) {
-            if ($this->send_email($cart, $subject, $body_template)) {
+            if ($this->send_email($cart, $subject, $body_template, 1)) {
                 $this->repository->increment_reminder_sent((int) $cart['id']);
                 $sent++;
             }
@@ -50,7 +53,7 @@ final class EmailScheduler {
 
         $carts_second = $this->repository->find_abandoned_for_reminder($second_hours, 2);
         foreach ($carts_second as $cart) {
-            if ($this->send_email($cart, $subject, $body_template)) {
+            if ($this->send_email($cart, $subject_2, $body_template_2, 2)) {
                 $this->repository->increment_reminder_sent((int) $cart['id']);
                 $sent++;
             }
@@ -61,7 +64,7 @@ final class EmailScheduler {
         }
     }
 
-    private function send_email(array $cart, string $subject, string $body_template): bool {
+    private function send_email(array $cart, string $subject, string $body_template, int $reminder_number = 1): bool {
         $email = $cart['email'] ?? '';
         if ($email === '') {
             return false;
@@ -70,15 +73,31 @@ final class EmailScheduler {
         $recovery_url = RecoveryHandler::get_recovery_url($cart['recovery_token'] ?? '');
         $cart_total_formatted = wc_price((float) ($cart['cart_total'] ?? 0), ['currency' => $cart['currency'] ?? 'EUR']);
         $shop_name = get_bloginfo('name');
+        $customer_name = $this->get_customer_name($cart);
+        $cart_items_html = $this->build_cart_items_html($cart);
 
-        $body = str_replace(
-            ['{{recovery_link}}', '{{cart_total}}', '{{shop_name}}'],
-            [$recovery_url, $cart_total_formatted, $shop_name],
-            $body_template
-        );
+        $placeholders = [
+            '{{recovery_link}}',
+            '{{cart_total}}',
+            '{{shop_name}}',
+            '{{customer_name}}',
+            '{{cart_items}}',
+            '{{reminder_number}}',
+        ];
+        $values = [
+            $recovery_url,
+            $cart_total_formatted,
+            $shop_name,
+            $customer_name,
+            $cart_items_html,
+            (string) $reminder_number,
+        ];
+
+        $body = str_replace($placeholders, $values, $body_template);
+        $subject = str_replace($placeholders, $values, $subject);
 
         $from_name = $this->settings->get('from_name') ?: $shop_name;
-        $from_email = get_option('admin_email');
+        $from_email = $this->settings->get('from_email') ?: get_option('admin_email');
 
         $subject = apply_filters('fp_cartrecovery_email_subject', $subject, $cart);
         $body = apply_filters('fp_cartrecovery_email_body', $body, $cart);
@@ -100,11 +119,22 @@ final class EmailScheduler {
         return $success;
     }
 
+    /**
+     * Invia email via wp_mail con struttura completa.
+     *
+     * Headers: Content-Type HTML, From, Reply-To, charset UTF-8.
+     * Filtro: fp_cartrecovery_wp_mail_headers
+     */
     private function send_via_wp(string $to, string $subject, string $body, string $from_name, string $from_email): bool {
+        $subject = str_replace(["\r", "\n"], '', $subject);
+
         $headers = [
             'Content-Type: text/html; charset=UTF-8',
-            sprintf('From: %s <%s>', $from_name, $from_email),
+            'From: ' . $from_name . ' <' . $from_email . '>',
+            'Reply-To: ' . $from_email,
         ];
+        $headers = apply_filters('fp_cartrecovery_wp_mail_headers', $headers, $to, $subject);
+
         return wp_mail($to, $subject, $body, $headers);
     }
 
@@ -161,6 +191,52 @@ final class EmailScheduler {
         }
 
         return true;
+    }
+
+    private function get_customer_name(array $cart): string {
+        $user_id = (int) ($cart['user_id'] ?? 0);
+        if ($user_id > 0) {
+            $user = get_userdata($user_id);
+            if ($user) {
+                $name = trim($user->first_name . ' ' . $user->last_name);
+                if ($name !== '') {
+                    return $name;
+                }
+                return $user->display_name ?: '';
+            }
+        }
+        return __('Cliente', 'fp-cartrecovery');
+    }
+
+    /**
+     * Costruisce HTML lista prodotti dal cart_content.
+     */
+    private function build_cart_items_html(array $cart): string {
+        $content = $cart['cart_content'] ?? '';
+        if ($content === '') {
+            return '';
+        }
+        $items = json_decode($content, true);
+        if (!is_array($items) || empty($items)) {
+            return '';
+        }
+
+        $lines = [];
+        foreach ($items as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+            $product_id = absint($item['product_id'] ?? 0);
+            $variation_id = absint($item['variation_id'] ?? 0);
+            $quantity = max(1, absint($item['quantity'] ?? 1));
+            $id = $variation_id > 0 ? $variation_id : $product_id;
+
+            $product = $id > 0 ? wc_get_product($id) : null;
+            $name = $product ? $product->get_name() : sprintf(__('Prodotto #%d', 'fp-cartrecovery'), $product_id);
+            $lines[] = sprintf('<li>%s &times; %s</li>', esc_html((string) $quantity), esc_html($name));
+        }
+
+        return $lines === [] ? '' : '<ul style="margin:0 0 16px;padding-left:20px;">' . implode('', $lines) . '</ul>';
     }
 
     private function get_default_body(): string {

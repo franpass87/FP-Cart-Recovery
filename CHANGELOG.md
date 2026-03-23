@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.5] - 2025-03-23
+
+### Added
+
+- **Personalizzazione email**: oggetto e corpo distinti per 1ª e 2ª reminder
+- Nuovi placeholder: `{{customer_name}}`, `{{cart_items}}`, `{{reminder_number}}`
+- Campo **Email mittente** configurabile
+- Sezione "Placeholder disponibili" in impostazioni con tabella di riferimento
+
 ## [1.0.4] - 2025-03-23
 
 ### Added
