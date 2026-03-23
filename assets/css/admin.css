@@ -221,6 +221,12 @@ body[class*="fpcartrecovery"] #wpbody-content > .wrap.fpcartrecovery-admin-page 
     background: var(--fpdms-bg-light);
 }
 
+.fpcartrecovery-actions-cell {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
 .fpcartrecovery-badge {
     display: inline-block;
     padding: 4px 10px;

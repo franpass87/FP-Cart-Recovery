@@ -6,6 +6,7 @@ namespace FP\CartRecovery\Integrations;
 
 use FP\CartRecovery\Domain\AbandonedCartRepository;
 use FP\CartRecovery\Domain\Settings;
+use FP\CartRecovery\Utils\ColorHelper;
 
 /**
  * Pianifica e invia le email di reminder per carrelli abbandonati.
@@ -20,7 +21,7 @@ final class EmailScheduler {
     ) {}
 
     public function register(): void {
-        add_action('init', [$this, 'ensure_scheduled']);
+        add_action('admin_init', [$this, 'ensure_scheduled']);
         add_action(self::CRON_HOOK, [$this, 'send_reminders']);
     }
 
@@ -32,8 +33,11 @@ final class EmailScheduler {
     }
 
     public function send_reminders(): void {
-        $first_hours = max(1, (int) $this->settings->get('first_reminder_hours', 2));
-        $second_hours = max(1, (int) $this->settings->get('second_reminder_hours', 24));
+        $abandon_min = max(0, (int) $this->settings->get('abandon_after_minutes', 30));
+        $abandon_hours = $abandon_min / 60.0;
+
+        $first_hours = max(1.0, max((float) $this->settings->get('first_reminder_hours', 2), $abandon_hours));
+        $second_hours = max(1.0, max((float) $this->settings->get('second_reminder_hours', 24), $abandon_hours));
 
         $subject = $this->settings->get('email_subject') ?: __('Hai dimenticato qualcosa nel carrello', 'fp-cartrecovery');
         $body_template = $this->settings->get('email_body') ?: $this->get_default_body();
@@ -43,7 +47,7 @@ final class EmailScheduler {
         $subject_2 = $this->settings->get('email_subject_2') ?: $subject;
         $body_template_2 = $this->settings->get('email_body_2') ?: $body_template;
 
-        $carts_first = $this->repository->find_abandoned_for_reminder($first_hours, 1);
+        $carts_first = $this->repository->find_abandoned_for_reminder((int) ceil($first_hours), 1);
         foreach ($carts_first as $cart) {
             if ($this->send_email($cart, $subject, $body_template, 1)) {
                 $this->repository->increment_reminder_sent((int) $cart['id']);
@@ -51,7 +55,7 @@ final class EmailScheduler {
             }
         }
 
-        $carts_second = $this->repository->find_abandoned_for_reminder($second_hours, 2);
+        $carts_second = $this->repository->find_abandoned_for_reminder((int) ceil($second_hours), 2);
         foreach ($carts_second as $cart) {
             if ($this->send_email($cart, $subject_2, $body_template_2, 2)) {
                 $this->repository->increment_reminder_sent((int) $cart['id']);
@@ -64,7 +68,7 @@ final class EmailScheduler {
         }
     }
 
-    private function send_email(array $cart, string $subject, string $body_template, int $reminder_number = 1): bool {
+    private function send_email(array $cart, string $subject, string $body_template, int $reminder_number = 1, bool $is_test = false): bool {
         $email = $cart['email'] ?? '';
         if ($email === '') {
             return false;
@@ -80,8 +84,8 @@ final class EmailScheduler {
         $logo_html = $logo_url !== ''
             ? '<img src="' . esc_url($logo_url) . '" alt="' . esc_attr($shop_name) . '" style="max-height:60px;width:auto;display:block;margin:0 auto 16px;" />'
             : '';
-        $primary_color = $this->sanitize_hex_color($this->settings->get('email_primary_color') ?: '#667eea');
-        $accent_color = $this->sanitize_hex_color($this->settings->get('email_accent_color') ?: '#764ba2');
+        $primary_color = ColorHelper::sanitize_hex($this->settings->get('email_primary_color') ?: '#667eea');
+        $accent_color = ColorHelper::sanitize_hex($this->settings->get('email_accent_color') ?: '#764ba2');
 
         $placeholders = [
             '{{recovery_link}}',
@@ -120,7 +124,7 @@ final class EmailScheduler {
             ? $this->send_via_brevo($email, $subject, $body, $from_name, $from_email, $cart)
             : $this->send_via_wp($email, $subject, $body, $from_name, $from_email);
 
-        if ($success && $provider === 'brevo' && defined('FP_TRACKING_VERSION')) {
+        if ($success && !$is_test && $provider === 'brevo' && defined('FP_TRACKING_VERSION')) {
             do_action('fp_tracking_event', 'cart_recovery_email_sent', [
                 'value'    => (float) ($cart['cart_total'] ?? 0),
                 'currency' => $cart['currency'] ?? 'EUR',
@@ -130,6 +134,14 @@ final class EmailScheduler {
         }
 
         return $success;
+    }
+
+    /**
+     * Invia email di prova (usa placeholder e provider configurato, senza evento tracking).
+     */
+    public function send_test_email(string $to, string $subject, string $body_template, array $cart): bool {
+        $cart_with_email = array_merge($cart, ['email' => $to]);
+        return $this->send_email($cart_with_email, $subject, $body_template, 1, true);
     }
 
     /**
@@ -250,14 +262,6 @@ final class EmailScheduler {
         }
 
         return $lines === [] ? '' : '<ul style="margin:0 0 16px;padding-left:20px;">' . implode('', $lines) . '</ul>';
-    }
-
-    private function sanitize_hex_color(string $color): string {
-        $color = trim($color);
-        if (preg_match('/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/', $color)) {
-            return $color;
-        }
-        return '#667eea';
     }
 
     private function get_default_body(): string {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FP\CartRecovery\Admin;
 
 use FP\CartRecovery\Domain\Settings;
+use FP\CartRecovery\Utils\ColorHelper;
 
 /**
  * Pagina Impostazioni FP Cart Recovery.
@@ -90,12 +91,22 @@ final class SettingsPage {
                     <div class="fpcartrecovery-card-body">
                         <div class="fpcartrecovery-fields-grid">
                             <div class="fpcartrecovery-field">
+                                <label><?php echo esc_html__('Minuti per considerare abbandono', 'fp-cartrecovery'); ?></label>
+                                <input type="number" name="abandon_after_minutes" value="<?php echo esc_attr((string) ($data['abandon_after_minutes'] ?? 30)); ?>" min="0" max="1440" class="small-text">
+                                <span class="fpcartrecovery-hint"><?php echo esc_html__('0 = usa solo ore email. Es: 30 = non inviare a carrelli modificati da meno di 30 min.', 'fp-cartrecovery'); ?></span>
+                            </div>
+                            <div class="fpcartrecovery-field">
                                 <label><?php echo esc_html__('Prima email (ore dopo abbandono)', 'fp-cartrecovery'); ?></label>
                                 <input type="number" name="first_reminder_hours" value="<?php echo esc_attr((string) ($data['first_reminder_hours'] ?? 2)); ?>" min="1" max="72" class="small-text">
                             </div>
                             <div class="fpcartrecovery-field">
                                 <label><?php echo esc_html__('Seconda email (ore dopo abbandono)', 'fp-cartrecovery'); ?></label>
                                 <input type="number" name="second_reminder_hours" value="<?php echo esc_attr((string) ($data['second_reminder_hours'] ?? 24)); ?>" min="1" max="168" class="small-text">
+                            </div>
+                            <div class="fpcartrecovery-field">
+                                <label><?php echo esc_html__('Scadenza link recovery (giorni)', 'fp-cartrecovery'); ?></label>
+                                <input type="number" name="recovery_link_expiry_days" value="<?php echo esc_attr((string) ($data['recovery_link_expiry_days'] ?? 0)); ?>" min="0" max="365" class="small-text">
+                                <span class="fpcartrecovery-hint"><?php echo esc_html__('0 = mai. Es: 7 = link valido 7 giorni dall\'ultima modifica carrello.', 'fp-cartrecovery'); ?></span>
                             </div>
                         </div>
                     </div>
@@ -196,6 +207,10 @@ final class SettingsPage {
                         <span class="dashicons dashicons-saved"></span>
                         <?php echo esc_html__('Salva impostazioni', 'fp-cartrecovery'); ?>
                     </button>
+                    <button type="button" id="fpcartrecovery-send-test-email" class="fpcartrecovery-btn fpcartrecovery-btn-secondary" style="margin-left:8px;">
+                        <span class="dashicons dashicons-email-alt"></span>
+                        <?php echo esc_html__('Invia email di prova', 'fp-cartrecovery'); ?>
+                    </button>
                 </p>
             </form>
         </div>
@@ -206,8 +221,10 @@ final class SettingsPage {
         $enabled = !empty($_POST['enabled']);
         $track_guests = !empty($_POST['track_guests']);
         $email_provider = in_array($_POST['email_provider'] ?? '', ['wp', 'brevo'], true) ? $_POST['email_provider'] : 'wp';
+        $abandon_min = max(0, min(1440, absint($_POST['abandon_after_minutes'] ?? 30)));
         $first_hours = max(1, min(72, absint($_POST['first_reminder_hours'] ?? 2)));
         $second_hours = max(1, min(168, absint($_POST['second_reminder_hours'] ?? 24)));
+        $expiry_days = max(0, min(365, absint($_POST['recovery_link_expiry_days'] ?? 0)));
         $email_subject = sanitize_text_field(wp_unslash($_POST['email_subject'] ?? ''));
         $email_body = wp_kses_post(wp_unslash($_POST['email_body'] ?? ''));
         $email_subject_2 = sanitize_text_field(wp_unslash($_POST['email_subject_2'] ?? ''));
@@ -215,15 +232,17 @@ final class SettingsPage {
         $from_name = sanitize_text_field(wp_unslash($_POST['from_name'] ?? ''));
         $from_email = sanitize_email(wp_unslash($_POST['from_email'] ?? ''));
         $logo_url = esc_url_raw(wp_unslash($_POST['email_logo_url'] ?? ''));
-        $primary_color = $this->sanitize_hex_color(sanitize_text_field(wp_unslash($_POST['email_primary_color'] ?? '#667eea')));
-        $accent_color = $this->sanitize_hex_color(sanitize_text_field(wp_unslash($_POST['email_accent_color'] ?? '#764ba2')));
+        $primary_color = ColorHelper::sanitize_hex(sanitize_text_field(wp_unslash($_POST['email_primary_color'] ?? '#667eea')));
+        $accent_color = ColorHelper::sanitize_hex(sanitize_text_field(wp_unslash($_POST['email_accent_color'] ?? '#764ba2')));
 
         $this->settings->save([
-            'enabled'               => $enabled,
-            'track_guests'          => $track_guests,
-            'email_provider'        => $email_provider,
-            'first_reminder_hours'  => $first_hours,
-            'second_reminder_hours' => $second_hours,
+            'enabled'                  => $enabled,
+            'track_guests'             => $track_guests,
+            'email_provider'           => $email_provider,
+            'abandon_after_minutes'    => $abandon_min,
+            'first_reminder_hours'     => $first_hours,
+            'second_reminder_hours'    => $second_hours,
+            'recovery_link_expiry_days'=> $expiry_days,
             'email_subject'         => $email_subject,
             'email_body'            => $email_body,
             'email_subject_2'       => $email_subject_2,
@@ -241,13 +260,5 @@ final class SettingsPage {
             __('Impostazioni salvate.', 'fp-cartrecovery'),
             'success'
         );
-    }
-
-    private function sanitize_hex_color(string $color): string {
-        $color = trim($color);
-        if (preg_match('/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/', $color)) {
-            return $color;
-        }
-        return '#667eea';
     }
 }

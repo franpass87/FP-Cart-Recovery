@@ -24,8 +24,9 @@ final class Settings {
         'from_name'             => '',
         'from_email'            => '',
         'email_logo_url'        => '',
-        'email_primary_color'   => '#667eea',
-        'email_accent_color'    => '#764ba2',
+        'email_primary_color'      => '#667eea',
+        'email_accent_color'       => '#764ba2',
+        'recovery_link_expiry_days' => 0,
     ];
 
     private array $data;

@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.1.0] - 2025-03-23
+
+### Added
+
+- **abandon_after_minutes**: filtra carrelli per invio email (min. inattività)
+- **Scadenza link recovery**: `recovery_link_expiry_days` (0 = mai)
+- **Eliminazione carrelli** dalla dashboard (pulsante con conferma)
+- **Email di prova** nelle impostazioni
+- Colonna **Reminder inviati** nella tabella carrelli
+- Helper `ColorHelper::sanitize_hex()` centralizzato
+
+### Changed
+
+- Cron `ensure_scheduled` su `admin_init` (riduce carico frontend)
+- Scheduling cron anche su attivazione plugin
+- Fix binding copia link in admin.js
+
 ## [1.0.6] - 2025-03-23
 
 ### Added

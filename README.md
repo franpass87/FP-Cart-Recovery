@@ -53,6 +53,11 @@ Plugin WordPress per il **recupero carrelli abbandonati** WooCommerce in stile F
 - `{{primary_color}}` — Colore primario (es. #667eea)
 - `{{accent_color}}` — Colore accent (es. #764ba2)
 
+## Tempistiche e scadenza
+
+- **Minuti abbandono**: minimo inattività prima di considerare il carrello abbandonato per le email
+- **Scadenza link**: giorni di validità del link recovery (0 = mai)
+
 ## Personalizzazione email
 
 - **1ª e 2ª email** separabili: oggetto e corpo personalizzabili per ogni reminder

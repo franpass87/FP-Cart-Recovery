@@ -13,6 +13,8 @@ use FP\CartRecovery\Integrations\RecoveryHandler;
  */
 final class DashboardPage {
 
+    private const PER_PAGE = 20;
+
     public function __construct(
         private readonly Settings $settings
     ) {}
@@ -23,7 +25,7 @@ final class DashboardPage {
 
         $page = max(1, isset($_GET['paged']) ? absint($_GET['paged']) : 1);
         $status_filter = isset($_GET['status']) ? sanitize_text_field(wp_unslash($_GET['status'])) : '';
-        $result = $repository->get_paginated($page, 20, $status_filter);
+        $result = $repository->get_paginated($page, self::PER_PAGE, $status_filter);
         $items = $result['items'];
         $total = $result['total'];
 
@@ -106,6 +108,7 @@ final class DashboardPage {
                                     <th><?php echo esc_html__('Email / Utente', 'fp-cartrecovery'); ?></th>
                                     <th><?php echo esc_html__('Totale', 'fp-cartrecovery'); ?></th>
                                     <th><?php echo esc_html__('Data', 'fp-cartrecovery'); ?></th>
+                                    <th><?php echo esc_html__('Reminder', 'fp-cartrecovery'); ?></th>
                                     <th><?php echo esc_html__('Stato', 'fp-cartrecovery'); ?></th>
                                     <th><?php echo esc_html__('Azioni', 'fp-cartrecovery'); ?></th>
                                 </tr>
@@ -127,18 +130,22 @@ final class DashboardPage {
                                         </td>
                                         <td><?php echo wc_price((float) ($row['cart_total'] ?? 0), ['currency' => $row['currency'] ?? 'EUR']); ?></td>
                                         <td><?php echo esc_html(wp_date(get_option('date_format') . ' ' . get_option('time_format'), strtotime($row['updated_at'] ?? 'now'))); ?></td>
+                                        <td><?php echo esc_html((string) ($row['reminder_sent'] ?? 0)); ?></td>
                                         <td>
                                             <span class="fpcartrecovery-badge fpcartrecovery-badge-<?php echo $row['status'] === 'recovered' ? 'success' : 'warning'; ?>">
                                                 <?php echo $row['status'] === 'recovered' ? esc_html__('Recuperato', 'fp-cartrecovery') : esc_html__('Abbandonato', 'fp-cartrecovery'); ?>
                                             </span>
                                         </td>
-                                        <td>
+                                        <td class="fpcartrecovery-actions-cell">
                                             <?php if (($row['status'] ?? '') === 'abandoned' && !empty($row['recovery_token'])) : ?>
                                                 <?php $recovery_url = RecoveryHandler::get_recovery_url($row['recovery_token']); ?>
                                                 <button type="button" class="fpcartrecovery-btn fpcartrecovery-btn-secondary fpcartrecovery-copy-link" data-url="<?php echo esc_attr($recovery_url); ?>">
                                                     <?php echo esc_html__('Copia link', 'fp-cartrecovery'); ?>
                                                 </button>
                                             <?php endif; ?>
+                                            <button type="button" class="fpcartrecovery-btn fpcartrecovery-btn-secondary fpcartrecovery-delete-cart" data-id="<?php echo esc_attr((string) ($row['id'] ?? 0)); ?>">
+                                                <?php echo esc_html__('Elimina', 'fp-cartrecovery'); ?>
+                                            </button>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -146,13 +153,13 @@ final class DashboardPage {
                         </table>
 
                         <?php
-                        if ($total > 20) {
+                        if ($total > self::PER_PAGE) {
                             $pagination = paginate_links([
                                 'base'      => add_query_arg('paged', '%#%'),
                                 'format'    => '',
                                 'prev_text' => '&laquo;',
                                 'next_text' => '&raquo;',
-                                'total'     => ceil($total / 20),
+                                'total'     => (int) ceil($total / self::PER_PAGE),
                                 'current'   => $page,
                             ]);
                             if ($pagination) {

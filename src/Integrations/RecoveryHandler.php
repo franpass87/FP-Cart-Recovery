@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FP\CartRecovery\Integrations;
 
 use FP\CartRecovery\Domain\AbandonedCartRepository;
+use FP\CartRecovery\Domain\Settings;
 
 /**
  * Gestisce il ripristino del carrello tramite link con token.
@@ -12,6 +13,10 @@ use FP\CartRecovery\Domain\AbandonedCartRepository;
 final class RecoveryHandler {
 
     private const QUERY_ARG = 'fp_cart_recovery';
+
+    public function __construct(
+        private readonly ?Settings $settings = null
+    ) {}
 
     public function register(): void {
         add_action('template_redirect', [$this, 'handle_recovery'], 5);
@@ -37,6 +42,16 @@ final class RecoveryHandler {
             wc_add_notice(__('Link di recupero non valido o già utilizzato.', 'fp-cartrecovery'), 'error');
             wp_safe_redirect(wc_get_cart_url());
             exit;
+        }
+
+        $expiry_days = (int) ($this->settings?->get('recovery_link_expiry_days') ?? 0);
+        if ($expiry_days > 0) {
+            $updated = strtotime($cart_record['updated_at'] ?? 'now');
+            if ($updated && (time() - $updated) > ($expiry_days * DAY_IN_SECONDS)) {
+                wc_add_notice(__('Questo link di recupero è scaduto.', 'fp-cartrecovery'), 'error');
+                wp_safe_redirect(wc_get_cart_url());
+                exit;
+            }
         }
 
         $cart_content = json_decode($cart_record['cart_content'] ?? '[]', true);

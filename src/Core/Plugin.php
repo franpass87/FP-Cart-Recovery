@@ -77,7 +77,7 @@ final class Plugin {
         $cart_tracker = new CartTracker($this->settings);
         $cart_tracker->register();
 
-        $recovery_handler = new RecoveryHandler();
+        $recovery_handler = new RecoveryHandler($this->settings);
         $recovery_handler->register();
 
         if ($this->settings->get('enabled', false)) {
@@ -87,6 +87,9 @@ final class Plugin {
 
         $admin_menu = new AdminMenu($this->settings);
         $admin_menu->register();
+
+        $admin_ajax = new \FP\CartRecovery\Admin\AdminAjax($this->settings);
+        $admin_ajax->register();
     }
 
     public function register_admin_menu(): void {
@@ -164,6 +167,8 @@ final class Plugin {
             'i18n'    => [
                 'confirmDelete' => __('Eliminare questo carrello abbandonato?', 'fp-cartrecovery'),
                 'copied'        => __('Link copiato negli appunti.', 'fp-cartrecovery'),
+                'deleted'       => __('Carrello eliminato.', 'fp-cartrecovery'),
+                'testEmailSent' => __('Email di prova inviata.', 'fp-cartrecovery'),
                 'selectLogo'    => __('Seleziona logo', 'fp-cartrecovery'),
                 'useImage'      => __('Usa questa immagine', 'fp-cartrecovery'),
             ],
