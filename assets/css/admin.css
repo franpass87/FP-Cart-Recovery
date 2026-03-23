@@ -1,0 +1,378 @@
+/**
+ * FP Cart Recovery — Admin UI
+ * Design system FP (fp-admin-ui-design-system.mdc)
+ */
+
+:root {
+    --fpdms-primary: #667eea;
+    --fpdms-primary-dark: #764ba2;
+    --fpdms-gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --fpdms-success: #10b981;
+    --fpdms-success-bg: #d1fae5;
+    --fpdms-success-text: #065f46;
+    --fpdms-warning: #f59e0b;
+    --fpdms-warning-bg: #fef3c7;
+    --fpdms-warning-text: #92400e;
+    --fpdms-text: #1f2937;
+    --fpdms-text-light: #4b5563;
+    --fpdms-text-muted: #9ca3af;
+    --fpdms-border: #e5e7eb;
+    --fpdms-border-light: #f3f4f6;
+    --fpdms-bg-white: #ffffff;
+    --fpdms-bg-light: #f9fafb;
+    --shadow-md: 0 4px 20px rgba(0,0,0,0.08);
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-pill: 999px;
+}
+
+body[class*="fpcartrecovery"] #wpbody-content > .wrap.fpcartrecovery-admin-page {
+    margin-top: 12px;
+}
+
+.wrap.fpcartrecovery-admin-page {
+    max-width: 1100px;
+    margin: 24px 20px 40px;
+    padding: 0;
+}
+
+.fpcartrecovery-page-header {
+    background: var(--fpdms-gradient-primary);
+    padding: 28px 32px;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+    margin-bottom: 28px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.fpcartrecovery-page-header-content .fpcartrecovery-page-header-title {
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0 0 6px;
+    color: white !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.fpcartrecovery-page-header-content p {
+    font-size: 14px;
+    margin: 0;
+    color: rgba(255,255,255,0.88) !important;
+}
+
+.fpcartrecovery-page-header-badge {
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: var(--radius-pill);
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+}
+
+.fpcartrecovery-status-bar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+}
+
+.fpcartrecovery-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--fpdms-bg-white);
+    border: 1.5px solid var(--fpdms-border);
+    color: var(--fpdms-text-light);
+    text-decoration: none;
+}
+
+.fpcartrecovery-status-pill:hover {
+    border-color: var(--fpdms-primary);
+}
+
+.fpcartrecovery-status-pill.is-active {
+    background: var(--fpdms-success-bg);
+    border-color: var(--fpdms-success);
+    color: var(--fpdms-success-text);
+}
+
+.fpcartrecovery-status-pill.is-missing {
+    background: var(--fpdms-warning-bg);
+    border-color: var(--fpdms-warning);
+    color: var(--fpdms-warning-text);
+}
+
+.fpcartrecovery-status-pill .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.fpcartrecovery-card {
+    background: var(--fpdms-bg-white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    margin-bottom: 24px;
+    overflow: hidden;
+}
+
+.fpcartrecovery-card-header {
+    background: var(--fpdms-bg-light);
+    padding: 16px 20px;
+    border-bottom: 2px solid var(--fpdms-border-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.fpcartrecovery-card-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.fpcartrecovery-card-header-left .dashicons {
+    color: var(--fpdms-primary);
+}
+
+.fpcartrecovery-card-header h2 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.fpcartrecovery-card-body {
+    padding: 20px;
+}
+
+.fpcartrecovery-filter-links {
+    display: flex;
+    gap: 12px;
+}
+
+.fpcartrecovery-filter-links a {
+    text-decoration: none;
+    color: var(--fpdms-text-light);
+}
+
+.fpcartrecovery-filter-links a.current {
+    color: var(--fpdms-primary);
+    font-weight: 600;
+}
+
+.fpcartrecovery-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 20px;
+}
+
+.fpcartrecovery-stat {
+    text-align: center;
+}
+
+.fpcartrecovery-stat-value {
+    display: block;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--fpdms-primary);
+}
+
+.fpcartrecovery-stat-label {
+    font-size: 12px;
+    color: var(--fpdms-text-muted);
+}
+
+.fpcartrecovery-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.fpcartrecovery-table thead {
+    background: var(--fpdms-gradient-primary);
+    color: white;
+}
+
+.fpcartrecovery-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+}
+
+.fpcartrecovery-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--fpdms-border-light);
+}
+
+.fpcartrecovery-table tbody tr:hover {
+    background: var(--fpdms-bg-light);
+}
+
+.fpcartrecovery-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.fpcartrecovery-badge-success {
+    background: var(--fpdms-success-bg);
+    color: var(--fpdms-success-text);
+}
+
+.fpcartrecovery-badge-warning {
+    background: var(--fpdms-warning-bg);
+    color: var(--fpdms-warning-text);
+}
+
+.fpcartrecovery-badge-neutral {
+    background: var(--fpdms-border-light);
+    color: var(--fpdms-text-muted);
+}
+
+.fpcartrecovery-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.fpcartrecovery-btn-primary {
+    background: var(--fpdms-gradient-primary);
+    color: white;
+}
+
+.fpcartrecovery-btn-secondary {
+    background: var(--fpdms-border-light);
+    color: var(--fpdms-text);
+}
+
+.fpcartrecovery-btn:hover {
+    opacity: 0.9;
+}
+
+.fpcartrecovery-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--fpdms-border-light);
+}
+
+.fpcartrecovery-toggle-row:last-child {
+    border-bottom: none;
+}
+
+.fpcartrecovery-toggle-info strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.fpcartrecovery-toggle-info span {
+    font-size: 13px;
+    color: var(--fpdms-text-muted);
+}
+
+.fpcartrecovery-toggle {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 26px;
+}
+
+.fpcartrecovery-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.fpcartrecovery-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--fpdms-border);
+    border-radius: var(--radius-pill);
+    transition: 0.25s;
+}
+
+.fpcartrecovery-toggle-slider::before {
+    content: "";
+    position: absolute;
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.25s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.fpcartrecovery-toggle input:checked + .fpcartrecovery-toggle-slider {
+    background: var(--fpdms-primary);
+}
+
+.fpcartrecovery-toggle input:checked + .fpcartrecovery-toggle-slider::before {
+    transform: translateX(22px);
+}
+
+.fpcartrecovery-fields-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.fpcartrecovery-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.fpcartrecovery-field-full {
+    grid-column: 1 / -1;
+}
+
+.fpcartrecovery-field label {
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.fpcartrecovery-field input,
+.fpcartrecovery-field textarea {
+    padding: 8px 12px;
+    border: 2px solid var(--fpdms-border);
+    border-radius: var(--radius-md);
+}
+
+.fpcartrecovery-field input:focus,
+.fpcartrecovery-field textarea:focus {
+    outline: none;
+    border-color: var(--fpdms-primary);
+}
+
+.fpcartrecovery-pagination {
+    margin-top: 20px;
+}

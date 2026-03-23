@@ -1,0 +1,52 @@
+# FP Cart Recovery
+
+Plugin WordPress per il **recupero carrelli abbandonati** WooCommerce in stile FP.
+
+## Funzionalità
+
+- **Tracciamento**: salva automaticamente i carrelli con prodotti (utenti loggati e guest)
+- **Email di richiamo**: invio automatico di reminder dopo 2h e 24h (configurabili)
+- **Link di recovery**: URL univoco per ripristinare il carrello con un click
+- **Dashboard admin**: statistiche e elenco carrelli abbandonati/recuperati
+- **Integrazione FP Tracking**: evento `cart_recovery` su recupero
+
+## Requisiti
+
+- WordPress 6.0+
+- PHP 8.0+
+- WooCommerce attivo
+
+## Installazione
+
+1. Carica la cartella del plugin in `wp-content/plugins/`
+2. Esegui `composer install` nella cartella del plugin
+3. Attiva da **Plugin** nel pannello WordPress
+
+## Utilizzo
+
+1. Vai in **FP Cart Recovery** nel menu admin
+2. Clicca **Impostazioni** e attiva il recupero
+3. Configura tempistiche (prima/seconda email) e template email
+4. I carrelli verranno tracciati automaticamente
+
+## Hook e filtri
+
+| Hook / Filtro | Descrizione |
+|---------------|-------------|
+| `fp_cartrecovery_cart_abandoned` | Eseguito quando un carrello viene salvato come abbandonato |
+| `fp_cartrecovery_cart_recovered` | Eseguito quando un carrello viene recuperato tramite link |
+| `fp_cartrecovery_email_subject` | Filtra l'oggetto email |
+| `fp_cartrecovery_email_body` | Filtra il corpo email |
+
+## Placeholder email
+
+- `{{recovery_link}}` — URL per ripristinare il carrello
+- `{{cart_total}}` — Totale formattato (es. €29,90)
+- `{{shop_name}}` — Nome del sito
+
+## Autore
+
+**Francesco Passeri**
+- Sito: [francescopasseri.com](https://francescopasseri.com)
+- Email: [info@francescopasseri.com](mailto:info@francescopasseri.com)
+- GitHub: [github.com/franpass87](https://github.com/franpass87)

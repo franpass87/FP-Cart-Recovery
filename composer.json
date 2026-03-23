@@ -1,0 +1,12 @@
+{
+    "name": "franpass87/fp-cart-recovery",
+    "description": "WooCommerce abandoned cart recovery - FP style",
+    "autoload": {
+        "psr-4": {
+            "FP\\CartRecovery\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=8.0"
+    }
+}
