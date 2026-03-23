@@ -360,6 +360,28 @@ body[class*="fpcartrecovery"] #wpbody-content > .wrap.fpcartrecovery-admin-page 
     font-size: 13px;
 }
 
+.fpcartrecovery-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.fpcartrecovery-radio-group label {
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.fpcartrecovery-hint {
+    display: block;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--fpdms-text-muted);
+}
+
 .fpcartrecovery-field input,
 .fpcartrecovery-field textarea {
     padding: 8px 12px;

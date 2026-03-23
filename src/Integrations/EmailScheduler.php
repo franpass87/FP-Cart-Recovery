@@ -68,24 +68,99 @@ final class EmailScheduler {
         }
 
         $recovery_url = RecoveryHandler::get_recovery_url($cart['recovery_token'] ?? '');
-        $cart_total = wc_price((float) ($cart['cart_total'] ?? 0), ['currency' => $cart['currency'] ?? 'EUR']);
+        $cart_total_formatted = wc_price((float) ($cart['cart_total'] ?? 0), ['currency' => $cart['currency'] ?? 'EUR']);
         $shop_name = get_bloginfo('name');
 
         $body = str_replace(
             ['{{recovery_link}}', '{{cart_total}}', '{{shop_name}}'],
-            [$recovery_url, $cart_total, $shop_name],
+            [$recovery_url, $cart_total_formatted, $shop_name],
             $body_template
         );
 
-        $headers = ['Content-Type: text/html; charset=UTF-8'];
         $from_name = $this->settings->get('from_name') ?: $shop_name;
         $from_email = get_option('admin_email');
-        $headers[] = sprintf('From: %s <%s>', $from_name, $from_email);
 
         $subject = apply_filters('fp_cartrecovery_email_subject', $subject, $cart);
         $body = apply_filters('fp_cartrecovery_email_body', $body, $cart);
 
-        return wp_mail($email, $subject, $body, $headers);
+        $provider = $this->settings->get('email_provider', 'wp');
+        $success = $provider === 'brevo'
+            ? $this->send_via_brevo($email, $subject, $body, $from_name, $from_email, $cart)
+            : $this->send_via_wp($email, $subject, $body, $from_name, $from_email);
+
+        if ($success && $provider === 'brevo' && defined('FP_TRACKING_VERSION')) {
+            do_action('fp_tracking_event', 'cart_recovery_email_sent', [
+                'value'    => (float) ($cart['cart_total'] ?? 0),
+                'currency' => $cart['currency'] ?? 'EUR',
+                'email'    => $email,
+                'cart_id'  => (int) ($cart['id'] ?? 0),
+            ]);
+        }
+
+        return $success;
+    }
+
+    private function send_via_wp(string $to, string $subject, string $body, string $from_name, string $from_email): bool {
+        $headers = [
+            'Content-Type: text/html; charset=UTF-8',
+            sprintf('From: %s <%s>', $from_name, $from_email),
+        ];
+        return wp_mail($to, $subject, $body, $headers);
+    }
+
+    /**
+     * Invia email via API Brevo (usa impostazioni centralizzate da FP Tracking).
+     */
+    private function send_via_brevo(string $to, string $subject, string $body, string $from_name, string $from_email, array $cart): bool {
+        if (!function_exists('fp_tracking_get_brevo_settings')) {
+            return $this->send_via_wp($to, $subject, $body, $from_name, $from_email);
+        }
+
+        $brevo = fp_tracking_get_brevo_settings();
+        if (empty($brevo['api_key']) || !$brevo['enabled']) {
+            return $this->send_via_wp($to, $subject, $body, $from_name, $from_email);
+        }
+
+        $payload = [
+            'sender'      => [
+                'name'  => $from_name,
+                'email' => $from_email,
+            ],
+            'to'          => [['email' => $to]],
+            'subject'     => str_replace(["\r", "\n"], '', $subject),
+            'htmlContent' => $body,
+        ];
+
+        $response = wp_remote_post(
+            'https://api.brevo.com/v3/smtp/email',
+            [
+                'headers' => [
+                    'accept'       => 'application/json',
+                    'api-key'      => $brevo['api_key'],
+                    'content-type' => 'application/json',
+                ],
+                'body'    => wp_json_encode($payload),
+                'timeout' => 15,
+            ]
+        );
+
+        if (is_wp_error($response)) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('[FP-Cart-Recovery] Brevo API error: ' . $response->get_error_message());
+            }
+            return $this->send_via_wp($to, $subject, $body, $from_name, $from_email);
+        }
+
+        $code = wp_remote_retrieve_response_code($response);
+        if ($code !== 201) {
+            $body_res = wp_remote_retrieve_body($response);
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('[FP-Cart-Recovery] Brevo API HTTP ' . $code . ': ' . $body_res);
+            }
+            return false;
+        }
+
+        return true;
     }
 
     private function get_default_body(): string {

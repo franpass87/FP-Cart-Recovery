@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.4] - 2025-03-23
+
+### Added
+
+- Opzione **Invio email**: WordPress (wp_mail) o Brevo (API + evento FP Tracking).
+- Con Brevo: usa impostazioni centralizzate da FP Marketing Tracking Layer; dopo l'invio emette `fp_tracking_event` (`cart_recovery_email_sent`) con value, currency, email, cart_id.
+- Fallback automatico a wp_mail se Brevo non configurato o in errore.
+
 ## [1.0.3] - 2025-03-23
 
 ### Changed

@@ -37,6 +37,7 @@ Plugin WordPress per il **recupero carrelli abbandonati** WooCommerce in stile F
 | `fp_cartrecovery_cart_recovered` | Eseguito quando un carrello viene recuperato tramite link |
 | `fp_tracking_event` (cart_abandoned) | Emesso con value, currency, items (GA4) quando il carrello viene salvato come abbandonato |
 | `fp_tracking_event` (cart_recovery) | Emesso con value, currency quando il carrello viene recuperato tramite link |
+| `fp_tracking_event` (cart_recovery_email_sent) | Emesso con value, currency, email, cart_id quando viene inviata email tramite Brevo |
 | `fp_cartrecovery_email_subject` | Filtra l'oggetto email |
 | `fp_cartrecovery_email_body` | Filtra il corpo email |
 

@@ -109,6 +109,20 @@ final class SettingsPage {
                         </div>
                     </div>
                     <div class="fpcartrecovery-card-body">
+                        <div class="fpcartrecovery-field fpcartrecovery-field-full" style="margin-bottom:16px">
+                            <label><?php echo esc_html__('Invio email', 'fp-cartrecovery'); ?></label>
+                            <div class="fpcartrecovery-radio-group">
+                                <label>
+                                    <input type="radio" name="email_provider" value="wp" <?php checked(($data['email_provider'] ?? 'wp') === 'wp'); ?>>
+                                    <?php echo esc_html__('WordPress (wp_mail)', 'fp-cartrecovery'); ?>
+                                </label>
+                                <label>
+                                    <input type="radio" name="email_provider" value="brevo" <?php checked(($data['email_provider'] ?? '') === 'brevo'); ?>>
+                                    <?php echo esc_html__('Brevo (API + evento FP Tracking)', 'fp-cartrecovery'); ?>
+                                </label>
+                            </div>
+                            <span class="fpcartrecovery-hint"><?php echo esc_html__('Brevo usa le impostazioni di FP Marketing Tracking Layer. Con Brevo viene emesso l\'evento cart_recovery_email_sent a fp_tracking_event.', 'fp-cartrecovery'); ?></span>
+                        </div>
                         <p class="description"><?php echo esc_html__('Placeholder: {{recovery_link}}, {{cart_total}}, {{shop_name}}', 'fp-cartrecovery'); ?></p>
                         <div class="fpcartrecovery-fields-grid">
                             <div class="fpcartrecovery-field fpcartrecovery-field-full">
@@ -141,6 +155,7 @@ final class SettingsPage {
     private function save(): void {
         $enabled = !empty($_POST['enabled']);
         $track_guests = !empty($_POST['track_guests']);
+        $email_provider = in_array($_POST['email_provider'] ?? '', ['wp', 'brevo'], true) ? $_POST['email_provider'] : 'wp';
         $first_hours = max(1, min(72, absint($_POST['first_reminder_hours'] ?? 2)));
         $second_hours = max(1, min(168, absint($_POST['second_reminder_hours'] ?? 24)));
         $email_subject = sanitize_text_field(wp_unslash($_POST['email_subject'] ?? ''));
@@ -150,6 +165,7 @@ final class SettingsPage {
         $this->settings->save([
             'enabled'               => $enabled,
             'track_guests'          => $track_guests,
+            'email_provider'        => $email_provider,
             'first_reminder_hours'  => $first_hours,
             'second_reminder_hours' => $second_hours,
             'email_subject'         => $email_subject,
