@@ -201,6 +201,8 @@ final class EmailScheduler {
         $subject = apply_filters('fp_cartrecovery_email_subject', $subject, $cart);
         $body = apply_filters('fp_cartrecovery_email_body', $body, $cart);
 
+        $body = $this->maybeFpMailBrandHtml($body);
+
         $provider = $this->settings->get('email_provider', 'wp');
         $success = $provider === 'brevo'
             ? $this->send_via_brevo($email, $subject, $body, $from_name, $from_email, $cart)
@@ -274,6 +276,20 @@ final class EmailScheduler {
         $headers = apply_filters('fp_cartrecovery_wp_mail_headers', $headers, $to, $subject);
 
         return wp_mail($to, $subject, $body, $headers);
+    }
+
+    /**
+     * Applica il layout FP Mail SMTP ai template HTML (salta documenti completi).
+     */
+    private function maybeFpMailBrandHtml(string $html): string {
+        if (!function_exists('fp_fpmail_brand_html') || $html === '') {
+            return $html;
+        }
+        if (preg_match('/<\s*!DOCTYPE/i', $html) === 1 || preg_match('/<\s*html[\s>]/i', $html) === 1) {
+            return $html;
+        }
+
+        return fp_fpmail_brand_html($html);
     }
 
     /**

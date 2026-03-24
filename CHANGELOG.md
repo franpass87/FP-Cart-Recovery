@@ -1,8 +1,10 @@
 # Changelog
 
-## [1.2.2] - 2026-03-23
+## [1.2.3] - 2026-03-24
+
 ### Changed
-- Evento `cart_abandoned` (fp_tracking_event): aggiunto `user_data` (email, nome, cognome) per Brevo e Meta CAPI quando disponibile (utenti loggati o guest con email catturata al checkout).
+
+- Email reminder: dopo i filtri `fp_cartrecovery_email_*`, il corpo HTML frammento passa da **FP Mail SMTP** (`fp_fpmail_brand_html`) se attivo; template già documento completo (`<!DOCTYPE` / `<html>`) non vengono ri-avvolti. Vale sia per `wp_mail` sia per invio Brevo.
 
 ## [1.2.1] - 2025-03-23
 
