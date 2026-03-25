@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.4] - 2026-03-24
+
+### Changed
+
+- Invio reminder via Brevo (`/v3/smtp/email`): prima del POST il payload passa da `fp_tracking_brevo_merge_transactional_tags()` se FP Marketing Tracking Layer espone la funzione (allineamento tag sito per log FP Mail SMTP / filtri API).
+
 ## [1.2.3] - 2026-03-24
 
 ### Changed

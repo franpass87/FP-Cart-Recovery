@@ -294,6 +294,7 @@ final class EmailScheduler {
 
     /**
      * Invia email via API Brevo (usa impostazioni centralizzate da FP Tracking).
+     * Il payload passa da {@see fp_tracking_brevo_merge_transactional_tags()} se FP Marketing Tracking Layer è attivo (tag sito per log/sync).
      */
     private function send_via_brevo(string $to, string $subject, string $body, string $from_name, string $from_email, array $cart): bool {
         if (!function_exists('fp_tracking_get_brevo_settings')) {
@@ -314,6 +315,10 @@ final class EmailScheduler {
             'subject'     => str_replace(["\r", "\n"], '', $subject),
             'htmlContent' => $body,
         ];
+
+        if (function_exists('fp_tracking_brevo_merge_transactional_tags')) {
+            $payload = fp_tracking_brevo_merge_transactional_tags($payload);
+        }
 
         $response = wp_remote_post(
             'https://api.brevo.com/v3/smtp/email',
