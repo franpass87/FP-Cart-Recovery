@@ -34,14 +34,20 @@ $errors = 0;
 // 1. Classi caricabili
 $classes = [
     'FP\\CartRecovery\\Core\\Plugin',
+    'FP\\CartRecovery\\Core\\Migrations',
     'FP\\CartRecovery\\Domain\\Settings',
     'FP\\CartRecovery\\Domain\\AbandonedCartRepository',
     'FP\\CartRecovery\\Integrations\\CartTracker',
     'FP\\CartRecovery\\Integrations\\EmailScheduler',
     'FP\\CartRecovery\\Integrations\\RecoveryHandler',
+    'FP\\CartRecovery\\Integrations\\UnsubscribeHandler',
+    'FP\\CartRecovery\\Integrations\\CleanupCron',
     'FP\\CartRecovery\\Admin\\AdminAjax',
+    'FP\\CartRecovery\\Admin\\AdminMenu',
     'FP\\CartRecovery\\Admin\\SettingsPage',
     'FP\\CartRecovery\\Admin\\DashboardPage',
+    'FP\\CartRecovery\\Admin\\HelpPage',
+    'FP\\CartRecovery\\Rest\\StatsController',
     'FP\\CartRecovery\\Utils\\ColorHelper',
 ];
 
@@ -75,15 +81,20 @@ if (file_exists($template)) {
     $errors++;
 }
 
-// 4. EmailScheduler constant
-if (defined('FP\\CartRecovery\\Integrations\\EmailScheduler::CRON_HOOK') || class_exists('FP\\CartRecovery\\Integrations\\EmailScheduler')) {
-    $hook = \FP\CartRecovery\Integrations\EmailScheduler::CRON_HOOK;
-    if ($hook === 'fp_cartrecovery_send_reminders') {
-        echo "OK  EmailScheduler::CRON_HOOK\n";
-    } else {
-        echo "FAIL CRON_HOOK value\n";
-        $errors++;
-    }
+// 4. EmailScheduler + CleanupCron constants
+$hook = \FP\CartRecovery\Integrations\EmailScheduler::CRON_HOOK;
+if ($hook === 'fp_cartrecovery_send_reminders') {
+    echo "OK  EmailScheduler::CRON_HOOK\n";
+} else {
+    echo "FAIL CRON_HOOK value\n";
+    $errors++;
+}
+$cleanup = \FP\CartRecovery\Integrations\CleanupCron::CRON_HOOK;
+if ($cleanup === 'fp_cartrecovery_cleanup_old_carts') {
+    echo "OK  CleanupCron::CRON_HOOK\n";
+} else {
+    echo "FAIL CleanupCron::CRON_HOOK\n";
+    $errors++;
 }
 
 echo "\n--- Risultato: " . ($errors === 0 ? "PASS" : "FAIL ($errors errori)") . " ---\n";

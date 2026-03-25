@@ -15,4 +15,6 @@ $wpdb->query("DROP TABLE IF EXISTS {$table}");
 
 delete_option('fp_cartrecovery_settings');
 delete_option('fp_cartrecovery_db_version');
+delete_option('fp_cartrecovery_unsubscribed_emails');
 wp_clear_scheduled_hook('fp_cartrecovery_send_reminders');
+wp_clear_scheduled_hook('fp_cartrecovery_cleanup_old_carts');
