@@ -98,9 +98,12 @@ final class RecoveryHandler {
         do_action('fp_cartrecovery_cart_recovered', (int) $cart_record['id'], $cart_record);
 
         if (defined('FP_TRACKING_VERSION')) {
+            $cid = (int) ($cart_record['id'] ?? 0);
             do_action('fp_tracking_event', 'cart_recovery', [
-                'value'    => (float) ($cart_record['cart_total'] ?? 0),
-                'currency' => $cart_record['currency'] ?? 'EUR',
+                'value'     => (float) ($cart_record['cart_total'] ?? 0),
+                'currency'  => $cart_record['currency'] ?? 'EUR',
+                'cart_id'   => $cid,
+                'event_id'  => 'fp_cartrecovery_recover_' . $cid . '_' . time(),
             ]);
         }
 

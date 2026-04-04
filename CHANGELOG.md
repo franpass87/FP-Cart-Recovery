@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.5] - 2026-04-04
+
+### Changed
+
+- Eventi `cart_recovery` e `cart_recovery_email_sent`: aggiunti `cart_id` ed `event_id` per allineamento al catalogo FP Marketing Tracking Layer.
+
 ## [1.2.4] - 2026-03-24
 
 ### Changed

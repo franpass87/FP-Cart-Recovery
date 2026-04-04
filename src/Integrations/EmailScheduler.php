@@ -209,11 +209,13 @@ final class EmailScheduler {
             : $this->send_via_wp($email, $subject, $body, $from_name, $from_email);
 
         if ($success && !$is_test && $provider === 'brevo' && defined('FP_TRACKING_VERSION')) {
+            $cartId = (int) ($cart['id'] ?? 0);
             do_action('fp_tracking_event', 'cart_recovery_email_sent', [
-                'value'    => (float) ($cart['cart_total'] ?? 0),
-                'currency' => $cart['currency'] ?? 'EUR',
-                'email'    => $email,
-                'cart_id'  => (int) ($cart['id'] ?? 0),
+                'value'     => (float) ($cart['cart_total'] ?? 0),
+                'currency'  => $cart['currency'] ?? 'EUR',
+                'email'     => $email,
+                'cart_id'   => $cartId,
+                'event_id'  => 'fp_cartrecovery_mail_' . $cartId . '_' . time(),
             ]);
         }
 
