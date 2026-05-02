@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.7] - 2026-05-02
+
+### Changed
+
+- Impostazioni **Template email**: oggetto e corpo HTML mostrano il testo predefinito del plugin (stessa logica a cascata dell’invio) così è modificabile subito; hint aggiornati. Metodi pubblici `EmailScheduler::get_default_body_template()` e `get_default_email_subject()`.
+
 ## [1.2.6] - 2026-05-02
 
 ### Added

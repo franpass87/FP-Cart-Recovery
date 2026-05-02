@@ -68,8 +68,8 @@ final class EmailScheduler {
         $third_enabled = (bool) $this->settings->get('third_reminder_enabled', false);
         $third_hours = max(1.0, max((float) $this->settings->get('third_reminder_hours', 72), $abandon_hours));
 
-        $subject = $this->settings->get('email_subject') ?: __('Hai dimenticato qualcosa nel carrello', 'fp-cartrecovery');
-        $body_template = $this->settings->get('email_body') ?: $this->get_default_body();
+        $subject = $this->settings->get('email_subject') ?: self::get_default_email_subject(1);
+        $body_template = $this->settings->get('email_body') ?: self::get_default_body_template();
 
         $sent = 0;
 
@@ -133,8 +133,8 @@ final class EmailScheduler {
         $reminder_num = min(3, (int) ($row['reminder_sent'] ?? 0) + 1);
         $subject_key = $reminder_num === 1 ? 'email_subject' : ($reminder_num === 2 ? 'email_subject_2' : 'email_subject_3');
         $body_key = $reminder_num === 1 ? 'email_body' : ($reminder_num === 2 ? 'email_body_2' : 'email_body_3');
-        $subject = $this->settings->get($subject_key) ?: __('Hai dimenticato qualcosa nel carrello', 'fp-cartrecovery');
-        $body = $this->settings->get($body_key) ?: $this->get_default_body();
+        $subject = $this->settings->get($subject_key) ?: self::get_default_email_subject(1);
+        $body = $this->settings->get($body_key) ?: self::get_default_body_template();
 
         if ($this->send_email($row, $subject, $body, $reminder_num)) {
             $this->repository->increment_reminder_sent($cart_id);
@@ -230,7 +230,7 @@ final class EmailScheduler {
      * Restituisce HTML email con placeholder sostituiti (per anteprima).
      */
     public function get_preview_html(array $cart): string {
-        $body_template = $this->settings->get('email_body') ?: $this->get_default_body();
+        $body_template = $this->settings->get('email_body') ?: self::get_default_body_template();
         $customer_name = $this->get_customer_name($cart);
         $logo_url = esc_url_raw($this->settings->get('email_logo_url') ?: '');
         $shop_name = get_bloginfo('name');
@@ -404,9 +404,25 @@ final class EmailScheduler {
         return $lines === [] ? '' : '<ul style="margin:0 0 16px;padding-left:20px;">' . implode('', $lines) . '</ul>';
     }
 
-    private function get_default_body(): string {
+    /**
+     * HTML del template email incluso nel plugin (`templates/emails/cart-recovery.php`).
+     */
+    public static function get_default_body_template(): string {
         ob_start();
         include FP_CARTRECOVERY_DIR . 'templates/emails/cart-recovery.php';
         return ob_get_clean() ?: '';
+    }
+
+    /**
+     * Oggetto predefinito per la 1ª o 2ª reminder (la 3ª in invio eredita dalla 2ª).
+     *
+     * @param int $step 1 = prima reminder, altri = seconda stringa predefinita.
+     */
+    public static function get_default_email_subject(int $step): string {
+        return match ($step) {
+            1 => __('Hai dimenticato qualcosa nel carrello', 'fp-cartrecovery'),
+            2 => __('Il tuo carrello ti aspetta ancora', 'fp-cartrecovery'),
+            default => __('Il tuo carrello ti aspetta ancora', 'fp-cartrecovery'),
+        };
     }
 }

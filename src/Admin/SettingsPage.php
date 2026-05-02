@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FP\CartRecovery\Admin;
 
 use FP\CartRecovery\Domain\Settings;
+use FP\CartRecovery\Integrations\EmailScheduler;
 use FP\CartRecovery\Utils\ColorHelper;
 
 /**
@@ -25,6 +26,27 @@ final class SettingsPage {
 
         settings_errors('fp_cartrecovery');
         $data = $this->settings->all();
+
+        $default_body_tpl = EmailScheduler::get_default_body_template();
+        $disp_email_subject = trim((string) ($data['email_subject'] ?? '')) !== ''
+            ? (string) $data['email_subject']
+            : EmailScheduler::get_default_email_subject(1);
+        $disp_email_body = (string) ($data['email_body'] ?? '') !== ''
+            ? (string) $data['email_body']
+            : $default_body_tpl;
+        $disp_email_subject_2 = trim((string) ($data['email_subject_2'] ?? '')) !== ''
+            ? (string) $data['email_subject_2']
+            : $disp_email_subject;
+        $disp_email_body_2 = (string) ($data['email_body_2'] ?? '') !== ''
+            ? (string) $data['email_body_2']
+            : $disp_email_body;
+        $disp_email_subject_3 = trim((string) ($data['email_subject_3'] ?? '')) !== ''
+            ? (string) $data['email_subject_3']
+            : $disp_email_subject_2;
+        $disp_email_body_3 = (string) ($data['email_body_3'] ?? '') !== ''
+            ? (string) $data['email_body_3']
+            : $disp_email_body_2;
+
         $dashboard_url = admin_url('admin.php?page=fp_cartrecovery_dashboard');
         ?>
         <div class="wrap fpcartrecovery-admin-page">
@@ -261,34 +283,36 @@ final class SettingsPage {
                                     <h4><?php echo esc_html__('1ª email', 'fp-cartrecovery'); ?></h4>
                                     <div class="fpcartrecovery-field">
                                         <label><?php echo esc_html__('Oggetto', 'fp-cartrecovery'); ?></label>
-                                        <input type="text" name="email_subject" value="<?php echo esc_attr($data['email_subject'] ?? ''); ?>" placeholder="<?php echo esc_attr__('Hai dimenticato qualcosa nel carrello', 'fp-cartrecovery'); ?>">
+                                        <input type="text" name="email_subject" value="<?php echo esc_attr($disp_email_subject); ?>" class="regular-text">
+                                        <span class="fpcartrecovery-hint"><?php echo esc_html__('Testo predefinito del plugin; modifica e salva per personalizzare.', 'fp-cartrecovery'); ?></span>
                                     </div>
                                     <div class="fpcartrecovery-field">
                                         <label><?php echo esc_html__('Corpo (HTML)', 'fp-cartrecovery'); ?></label>
-                                        <textarea name="email_body" rows="5" placeholder="<?php echo esc_attr__('Vuoto = template default', 'fp-cartrecovery'); ?>"><?php echo esc_textarea($data['email_body'] ?? ''); ?></textarea>
+                                        <textarea name="email_body" rows="12" class="large-text code"><?php echo esc_textarea($disp_email_body); ?></textarea>
                                     </div>
                                 </div>
                                 <div class="fpcartrecovery-email-tab">
                                     <h4><?php echo esc_html__('2ª email', 'fp-cartrecovery'); ?></h4>
                                     <div class="fpcartrecovery-field">
                                         <label><?php echo esc_html__('Oggetto', 'fp-cartrecovery'); ?></label>
-                                        <input type="text" name="email_subject_2" value="<?php echo esc_attr($data['email_subject_2'] ?? ''); ?>" placeholder="<?php echo esc_attr__('Il tuo carrello ti aspetta ancora', 'fp-cartrecovery'); ?>">
-                                        <span class="fpcartrecovery-hint"><?php echo esc_html__('Vuoto = uguale alla 1ª', 'fp-cartrecovery'); ?></span>
+                                        <input type="text" name="email_subject_2" value="<?php echo esc_attr($disp_email_subject_2); ?>" class="regular-text">
+                                        <span class="fpcartrecovery-hint"><?php echo esc_html__('Se salvi oggetto e corpo vuoti, verranno riusati quelli della 1ª.', 'fp-cartrecovery'); ?></span>
                                     </div>
                                     <div class="fpcartrecovery-field">
                                         <label><?php echo esc_html__('Corpo (HTML)', 'fp-cartrecovery'); ?></label>
-                                        <textarea name="email_body_2" rows="5"><?php echo esc_textarea($data['email_body_2'] ?? ''); ?></textarea>
+                                        <textarea name="email_body_2" rows="12" class="large-text code"><?php echo esc_textarea($disp_email_body_2); ?></textarea>
                                     </div>
                                 </div>
                                 <div class="fpcartrecovery-email-tab fpcartrecovery-third-email"<?php echo empty($data['third_reminder_enabled']) ? ' style="display:none"' : ''; ?>>
                                     <h4><?php echo esc_html__('3ª email', 'fp-cartrecovery'); ?></h4>
                                     <div class="fpcartrecovery-field">
                                         <label><?php echo esc_html__('Oggetto', 'fp-cartrecovery'); ?></label>
-                                        <input type="text" name="email_subject_3" value="<?php echo esc_attr($data['email_subject_3'] ?? ''); ?>">
+                                        <input type="text" name="email_subject_3" value="<?php echo esc_attr($disp_email_subject_3); ?>" class="regular-text">
+                                        <span class="fpcartrecovery-hint"><?php echo esc_html__('Se salvi vuoto, verranno riusati oggetto e corpo della 2ª (o della 1ª in cascata).', 'fp-cartrecovery'); ?></span>
                                     </div>
                                     <div class="fpcartrecovery-field">
                                         <label><?php echo esc_html__('Corpo (HTML)', 'fp-cartrecovery'); ?></label>
-                                        <textarea name="email_body_3" rows="5"><?php echo esc_textarea($data['email_body_3'] ?? ''); ?></textarea>
+                                        <textarea name="email_body_3" rows="12" class="large-text code"><?php echo esc_textarea($disp_email_body_3); ?></textarea>
                                     </div>
                                 </div>
                             </div>

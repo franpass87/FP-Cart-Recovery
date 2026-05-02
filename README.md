@@ -70,7 +70,7 @@ Plugin WordPress per il **recupero carrelli abbandonati** WooCommerce in stile F
 
 ## Personalizzazione email
 
-- **1ª e 2ª email** separabili: oggetto e corpo personalizzabili per ogni reminder
+- **1ª e 2ª email** separabili: in impostazioni i campi sono precompilati con i default del plugin (file `templates/emails/cart-recovery.php` e oggetti tradotti); salva per persistere le modifiche
 - **Mittente**: nome e email configurabili
 - **Logo**: URL immagine nell'header (Media Library)
 - **Colori**: primario e accent per header, bottone e link
