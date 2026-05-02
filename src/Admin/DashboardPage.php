@@ -37,6 +37,7 @@ final class DashboardPage {
         $total = $result['total'];
 
         $settings_url = admin_url('admin.php?page=' . AdminMenu::SETTINGS_SLUG);
+        $live_url = admin_url('admin.php?page=' . AdminMenu::LIVE_SLUG);
         ?>
         <div class="wrap fpcartrecovery-admin-page">
             <h1 class="screen-reader-text"><?php echo esc_html__('FP Cart Recovery', 'fp-cartrecovery'); ?></h1>
@@ -59,6 +60,9 @@ final class DashboardPage {
                 </span>
                 <a href="<?php echo esc_url($settings_url); ?>" class="fpcartrecovery-status-pill">
                     <?php echo esc_html__('Impostazioni', 'fp-cartrecovery'); ?>
+                </a>
+                <a href="<?php echo esc_url($live_url); ?>" class="fpcartrecovery-status-pill">
+                    <?php echo esc_html__('Carrelli attivi', 'fp-cartrecovery'); ?>
                 </a>
             </div>
 

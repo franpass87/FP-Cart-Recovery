@@ -664,3 +664,45 @@ body[class*="fpcartrecovery"] #wpbody-content > .wrap.fpcartrecovery-admin-page 
 .fpcartrecovery-fields-inline {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
+
+/* Vista carrelli attivi (polling) */
+.fpcartrecovery-live-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--fpdms-text-light);
+}
+
+.fpcartrecovery-live-window {
+    min-width: 120px;
+}
+
+.fpcartrecovery-live-last {
+    color: var(--fpdms-text-muted);
+    font-size: 12px;
+}
+
+.fpcartrecovery-live-hint {
+    margin-bottom: 12px;
+}
+
+.fpcartrecovery-live-loading {
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: var(--fpdms-primary);
+}
+
+.fpcartrecovery-live-summary {
+    max-width: 280px;
+    font-size: 12px;
+    color: var(--fpdms-text-light);
+    word-break: break-word;
+}
+
+.fpcartrecovery-live-empty {
+    text-align: center;
+    color: var(--fpdms-text-muted);
+    padding: 24px 12px;
+}

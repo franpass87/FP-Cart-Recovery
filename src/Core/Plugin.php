@@ -99,6 +99,9 @@ final class Plugin {
 
         $rest_stats = new \FP\CartRecovery\Rest\StatsController();
         $rest_stats->register();
+
+        $rest_active = new \FP\CartRecovery\Rest\ActiveCartsController();
+        $rest_active->register();
     }
 
     public function register_admin_menu(): void {
@@ -145,7 +148,7 @@ final class Plugin {
     public function enqueue_admin_assets(string $hook): void {
         $page = isset($_GET['page']) ? sanitize_text_field(wp_unslash($_GET['page'])) : '';
         $is_our_page = str_contains($hook, 'fp_cartrecovery')
-            || in_array($page, ['fp_cartrecovery_dashboard', 'fp_cartrecovery_settings', 'fp_cartrecovery_help'], true);
+            || in_array($page, ['fp_cartrecovery_dashboard', 'fp_cartrecovery_settings', 'fp_cartrecovery_help', 'fp_cartrecovery_live'], true);
 
         if (!$is_our_page) {
             return;
@@ -183,6 +186,30 @@ final class Plugin {
                 'useImage'      => __('Usa questa immagine', 'fp-cartrecovery'),
             ],
         ]);
+
+        if ($page === \FP\CartRecovery\Admin\AdminMenu::LIVE_SLUG) {
+            wp_enqueue_script(
+                'fp-cartrecovery-live',
+                FP_CARTRECOVERY_URL . 'assets/js/live-carts.js',
+                ['fp-cartrecovery-admin'],
+                FP_CARTRECOVERY_VERSION,
+                true
+            );
+            wp_localize_script('fp-cartrecovery-live', 'fpCartRecoveryLive', [
+                'restUrl'   => rest_url('fp-cart-recovery/v1/active-carts'),
+                'restNonce' => wp_create_nonce('wp_rest'),
+                'pollMs'    => 8000,
+                'i18n'      => [
+                    'empty'       => __('Nessun carrello attivo nella finestra selezionata.', 'fp-cartrecovery'),
+                    'error'       => __('Errore di aggiornamento. Riprova.', 'fp-cartrecovery'),
+                    'lastSync'    => __('Sincronizzato:', 'fp-cartrecovery'),
+                    'lastSyncNow' => __('Aggiornato.', 'fp-cartrecovery'),
+                    'copyLink'    => __('Copia link', 'fp-cartrecovery'),
+                    'sendEmail'   => __('Invia email', 'fp-cartrecovery'),
+                    'delete'      => __('Elimina', 'fp-cartrecovery'),
+                ],
+            ]);
+        }
     }
 
     public function get_settings(): Settings {

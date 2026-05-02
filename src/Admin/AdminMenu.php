@@ -13,6 +13,9 @@ final class AdminMenu {
 
     public const SETTINGS_SLUG = 'fp_cartrecovery_settings';
 
+    /** Slug sottomenu vista carrelli quasi live (polling REST). */
+    public const LIVE_SLUG = 'fp_cartrecovery_live';
+
     public function __construct(
         private readonly Settings $settings
     ) {}
@@ -24,6 +27,14 @@ final class AdminMenu {
     public const HELP_SLUG = 'fp_cartrecovery_help';
 
     public function add_submenus(): void {
+        add_submenu_page(
+            'fp_cartrecovery_dashboard',
+            __('Carrelli attivi', 'fp-cartrecovery'),
+            __('Carrelli attivi', 'fp-cartrecovery'),
+            'manage_options',
+            self::LIVE_SLUG,
+            [$this, 'render_live']
+        );
         add_submenu_page(
             'fp_cartrecovery_dashboard',
             __('Impostazioni', 'fp-cartrecovery'),
@@ -44,6 +55,11 @@ final class AdminMenu {
 
     public function render_help(): void {
         $page = new HelpPage();
+        $page->render();
+    }
+
+    public function render_live(): void {
+        $page = new LiveCartsPage($this->settings);
         $page->render();
     }
 

@@ -277,6 +277,31 @@ final class AbandonedCartRepository {
      * @param int $days 0 = tutti i dati, altrimenti ultimi X giorni.
      * @return array{abandoned: int, recovered: int, recovered_value: float}
      */
+    /**
+     * Carrelli abbandonati aggiornati nell'ultimo intervallo (vista quasi live in admin).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function find_active_abandoned(int $minutes, int $limit = 50): array {
+        $minutes = max(1, min(120, $minutes));
+        $limit = max(1, min(100, $limit));
+        $cutoff = date('Y-m-d H:i:s', strtotime('-' . $minutes . ' minutes', strtotime(current_time('mysql'))));
+
+        $sql = $this->wpdb->prepare(
+            "SELECT id, session_key, user_id, email, cart_content, cart_total, currency, recovery_token, status, reminder_sent, updated_at
+            FROM {$this->table}
+            WHERE status = 'abandoned' AND updated_at >= %s
+            ORDER BY updated_at DESC
+            LIMIT %d",
+            $cutoff,
+            $limit
+        );
+
+        $rows = $this->wpdb->get_results($sql, ARRAY_A);
+
+        return is_array($rows) ? $rows : [];
+    }
+
     public function get_stats(int $days = 0): array {
         $cutoff = $days > 0 ? gmdate('Y-m-d H:i:s', strtotime("-{$days} days")) : null;
 

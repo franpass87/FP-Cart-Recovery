@@ -3,7 +3,7 @@
  * Plugin Name:       FP Cart Recovery
  * Plugin URI:        https://github.com/franpass87/FP-Cart-Recovery
  * Description:       Cart recovery per WooCommerce: traccia carrelli abbandonati, invia email di richiamo e link per ripristinare il carrello.
- * Version:           1.2.5
+ * Version:           1.2.6
  * Requires at least: 6.0
  * Requires PHP:      8.0
  * Author:            Francesco Passeri
@@ -19,7 +19,7 @@ declare(strict_types=1);
 
 defined('ABSPATH') || exit;
 
-define('FP_CARTRECOVERY_VERSION', '1.2.5');
+define('FP_CARTRECOVERY_VERSION', '1.2.6');
 define('FP_CARTRECOVERY_FILE', __FILE__);
 define('FP_CARTRECOVERY_DIR', plugin_dir_path(__FILE__));
 define('FP_CARTRECOVERY_URL', plugin_dir_url(__FILE__));

@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.2.6] - 2026-05-02
+
+### Added
+
+- **Carrelli attivi** (sottomenu admin): tabella con aggiornamento automatico ogni 8 secondi tramite `GET /fp-cart-recovery/v1/active-carts` (finestra 5–60 minuti). Usa gli stessi record già salvati da `CartTracker` (nessuna modifica al flusso di tracciamento).
+- Elenco REST con anteprima righe, totale formattato e azioni Copia link / Invia email / Elimina (stessi handler AJAX della dashboard).
+
+### Changed
+
+- Admin JS: handler delegati per copia link, invio reminder ed eliminazione carrello (compatibile con righe inserite dinamicamente dalla vista live).
+
 ## [1.2.5] - 2026-04-04
 
 ### Changed
