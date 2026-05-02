@@ -33,6 +33,20 @@
             });
         }
 
+        const $trackToggle = $('#fpcartrecovery-enabled-tracking');
+        const $emailsToggle = $('#fpcartrecovery-enabled-emails');
+        if ($trackToggle.length && $emailsToggle.length) {
+            function syncEmailsToggleWithTracking() {
+                var on = $trackToggle.is(':checked');
+                $emailsToggle.prop('disabled', !on);
+                if (!on) {
+                    $emailsToggle.prop('checked', false);
+                }
+            }
+            $trackToggle.on('change', syncEmailsToggleWithTracking);
+            syncEmailsToggleWithTracking();
+        }
+
         $(document).on('click', '.fpcartrecovery-copy-link', function () {
             const $btn = $(this);
             const url = $btn.data('url');

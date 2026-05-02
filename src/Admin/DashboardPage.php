@@ -53,10 +53,18 @@ final class DashboardPage {
                 <span class="fpcartrecovery-page-header-badge">v<?php echo esc_html(FP_CARTRECOVERY_VERSION); ?></span>
             </div>
 
+            <?php
+            $dash_tracking = (bool) $this->settings->get('enabled', false);
+            $dash_emails = $dash_tracking && (bool) $this->settings->get('emails_enabled', false);
+            ?>
             <div class="fpcartrecovery-status-bar">
-                <span class="fpcartrecovery-status-pill <?php echo $this->settings->get('enabled') ? 'is-active' : 'is-missing'; ?>">
+                <span class="fpcartrecovery-status-pill <?php echo $dash_tracking ? 'is-active' : 'is-missing'; ?>">
                     <span class="dot"></span>
-                    <?php echo $this->settings->get('enabled') ? esc_html__('Recupero attivo', 'fp-cartrecovery') : esc_html__('Attiva nelle impostazioni', 'fp-cartrecovery'); ?>
+                    <?php echo $dash_tracking ? esc_html__('Tracciamento attivo', 'fp-cartrecovery') : esc_html__('Tracciamento disattivo', 'fp-cartrecovery'); ?>
+                </span>
+                <span class="fpcartrecovery-status-pill <?php echo $dash_emails ? 'is-active' : 'is-missing'; ?>">
+                    <span class="dot"></span>
+                    <?php echo $dash_emails ? esc_html__('Email automatiche attive', 'fp-cartrecovery') : esc_html__('Email automatiche off', 'fp-cartrecovery'); ?>
                 </span>
                 <a href="<?php echo esc_url($settings_url); ?>" class="fpcartrecovery-status-pill">
                     <?php echo esc_html__('Impostazioni', 'fp-cartrecovery'); ?>

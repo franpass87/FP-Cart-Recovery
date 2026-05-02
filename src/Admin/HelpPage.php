@@ -35,6 +35,7 @@ final class HelpPage {
                 <div class="fpcartrecovery-card-body">
                     <ul style="line-height:1.8;">
                         <li><?php echo esc_html__('Tracciamento automatico carrelli WooCommerce (utenti loggati e guest)', 'fp-cartrecovery'); ?></li>
+                        <li><?php echo esc_html__('Impostazioni: tracciamento e email automatiche sono due interruttori distinti (puoi tracciare senza inviare reminder programmati).', 'fp-cartrecovery'); ?></li>
                         <li><?php echo esc_html__('Email di richiamo configurabili (1ª, 2ª, 3ª)', 'fp-cartrecovery'); ?></li>
                         <li><?php echo esc_html__('Link di recovery per ripristinare il carrello con un click', 'fp-cartrecovery'); ?></li>
                         <li><?php echo esc_html__('Soglia minimo carrello, esclusione prodotti/categorie', 'fp-cartrecovery'); ?></li>

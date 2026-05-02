@@ -55,6 +55,10 @@ final class EmailScheduler {
     }
 
     public function send_reminders(): void {
+        if (!$this->settings->get('emails_enabled', false)) {
+            return;
+        }
+
         $abandon_min = max(0, (int) $this->settings->get('abandon_after_minutes', 30));
         $abandon_hours = $abandon_min / 60.0;
         $min_cart_value = (float) $this->settings->get('min_cart_value', 0);

@@ -53,18 +53,32 @@ final class SettingsPage {
                             <span class="dashicons dashicons-yes-alt"></span>
                             <h2><?php echo esc_html__('Funzionalità', 'fp-cartrecovery'); ?></h2>
                         </div>
-                        <span class="fpcartrecovery-badge <?php echo !empty($data['enabled']) ? 'fpcartrecovery-badge-success' : 'fpcartrecovery-badge-neutral'; ?>">
-                            <?php echo !empty($data['enabled']) ? '&#10003; ' . esc_html__('Attivo', 'fp-cartrecovery') : esc_html__('Disattivo', 'fp-cartrecovery'); ?>
+                        <?php
+                        $tracking_on = !empty($data['enabled']);
+                        $emails_on = $tracking_on && !empty($data['emails_enabled']);
+                        ?>
+                        <span class="fpcartrecovery-badge <?php echo $tracking_on ? 'fpcartrecovery-badge-success' : 'fpcartrecovery-badge-neutral'; ?>">
+                            <?php echo $tracking_on ? '&#10003; ' . esc_html__('Tracciamento attivo', 'fp-cartrecovery') : esc_html__('Disattivo', 'fp-cartrecovery'); ?>
                         </span>
                     </div>
                     <div class="fpcartrecovery-card-body">
                         <div class="fpcartrecovery-toggle-row">
                             <div class="fpcartrecovery-toggle-info">
-                                <strong><?php echo esc_html__('Attiva recupero carrelli', 'fp-cartrecovery'); ?></strong>
-                                <span><?php echo esc_html__('Traccia carrelli abbandonati e invia email di richiamo.', 'fp-cartrecovery'); ?></span>
+                                <strong><?php echo esc_html__('Traccia carrelli abbandonati', 'fp-cartrecovery'); ?></strong>
+                                <span><?php echo esc_html__('Salva carrelli in dashboard e statistiche; consente invio manuale e link di recovery.', 'fp-cartrecovery'); ?></span>
                             </div>
                             <label class="fpcartrecovery-toggle">
-                                <input type="checkbox" name="enabled" value="1" <?php checked(!empty($data['enabled'])); ?>>
+                                <input type="checkbox" name="enabled" value="1" id="fpcartrecovery-enabled-tracking" <?php checked($tracking_on); ?>>
+                                <span class="fpcartrecovery-toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="fpcartrecovery-toggle-row">
+                            <div class="fpcartrecovery-toggle-info">
+                                <strong><?php echo esc_html__('Email di richiamo automatiche', 'fp-cartrecovery'); ?></strong>
+                                <span><?php echo esc_html__('Invio programmato (cron) delle reminder. Disattivalo per tracciare senza email automatiche.', 'fp-cartrecovery'); ?></span>
+                            </div>
+                            <label class="fpcartrecovery-toggle">
+                                <input type="checkbox" name="emails_enabled" value="1" id="fpcartrecovery-enabled-emails" <?php checked($emails_on); ?> <?php disabled(!$tracking_on); ?>>
                                 <span class="fpcartrecovery-toggle-slider"></span>
                             </label>
                         </div>
@@ -329,6 +343,7 @@ final class SettingsPage {
 
     private function save(): void {
         $enabled = !empty($_POST['enabled']);
+        $emails_enabled = $enabled && !empty($_POST['emails_enabled']);
         $track_guests = !empty($_POST['track_guests']);
         $email_provider = in_array($_POST['email_provider'] ?? '', ['wp', 'brevo'], true) ? $_POST['email_provider'] : 'wp';
         $abandon_min = max(0, min(1440, absint($_POST['abandon_after_minutes'] ?? 30)));
@@ -360,6 +375,7 @@ final class SettingsPage {
         $old_cron = $this->settings->get('cron_interval', 'hourly');
         $this->settings->save([
             'enabled'                  => $enabled,
+            'emails_enabled'           => $emails_enabled,
             'track_guests'             => $track_guests,
             'email_provider'           => $email_provider,
             'abandon_after_minutes'    => $abandon_min,
@@ -390,6 +406,11 @@ final class SettingsPage {
 
         if ($cron_interval !== $old_cron) {
             wp_clear_scheduled_hook(\FP\CartRecovery\Integrations\EmailScheduler::CRON_HOOK);
+        }
+        if (!$emails_enabled) {
+            wp_clear_scheduled_hook(\FP\CartRecovery\Integrations\EmailScheduler::CRON_HOOK);
+        } elseif ($emails_enabled) {
+            (new \FP\CartRecovery\Integrations\EmailScheduler($this->settings))->ensure_scheduled();
         }
 
         add_settings_error(

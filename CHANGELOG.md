@@ -1,21 +1,14 @@
 # Changelog
 
-## [1.2.7] - 2026-05-02
-
-### Fixed
-
-- `AbandonedCartRepository`: PHPDoc di `get_stats()` ripristinato sul metodo corretto (doppio docblock introdotto con `find_active_abandoned`).
-
 ## [1.2.6] - 2026-05-02
 
 ### Added
 
-- **Carrelli attivi** (sottomenu admin): tabella con aggiornamento automatico ogni 8 secondi tramite `GET /fp-cart-recovery/v1/active-carts` (finestra 5–60 minuti). Usa gli stessi record già salvati da `CartTracker` (nessuna modifica al flusso di tracciamento).
-- Elenco REST con anteprima righe, totale formattato e azioni Copia link / Invia email / Elimina (stessi handler AJAX della dashboard).
+- Impostazione **`emails_enabled`**: interruttore separato da **Traccia carrelli abbandonati** per inviare o meno le reminder automatiche (cron). Retrocompatibilità: se l’opzione non era salvata, assume il valore precedente di `enabled`.
 
 ### Changed
 
-- Admin JS: handler delegati per copia link, invio reminder ed eliminazione carrello (compatibile con righe inserite dinamicamente dalla vista live).
+- Dashboard: due pill di stato (tracciamento / email automatiche).
 
 ## [1.2.5] - 2026-04-04
 

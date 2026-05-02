@@ -12,6 +12,7 @@ final class Settings {
     private const OPTION_KEY = 'fp_cartrecovery_settings';
     private const DEFAULTS = [
         'enabled'                  => false,
+        'emails_enabled'           => false,
         'abandon_after_minutes'    => 30,
         'first_reminder_hours'     => 2,
         'second_reminder_hours'    => 24,
@@ -45,7 +46,11 @@ final class Settings {
     public function __construct() {
         $saved = get_option(self::OPTION_KEY, []);
         $saved = is_array($saved) ? $saved : [];
+        $migrate_emails = !array_key_exists('emails_enabled', $saved);
         $this->data = array_merge(self::DEFAULTS, $saved);
+        if ($migrate_emails) {
+            $this->data['emails_enabled'] = !empty($this->data['enabled']);
+        }
     }
 
     public function get(string $key, mixed $default = null): mixed {

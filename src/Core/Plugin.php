@@ -86,7 +86,7 @@ final class Plugin {
         $cleanup_cron = new \FP\CartRecovery\Integrations\CleanupCron($this->settings);
         $cleanup_cron->register();
 
-        if ($this->settings->get('enabled', false)) {
+        if ($this->settings->get('emails_enabled', false)) {
             $email_scheduler = new EmailScheduler($this->settings);
             $email_scheduler->register();
         }
