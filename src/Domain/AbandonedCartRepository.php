@@ -272,12 +272,6 @@ final class AbandonedCartRepository {
     }
 
     /**
-     * Statistiche per dashboard (con filtro temporale opzionale).
-     *
-     * @param int $days 0 = tutti i dati, altrimenti ultimi X giorni.
-     * @return array{abandoned: int, recovered: int, recovered_value: float}
-     */
-    /**
      * Carrelli abbandonati aggiornati nell'ultimo intervallo (vista quasi live in admin).
      *
      * @return array<int, array<string, mixed>>
@@ -302,6 +296,12 @@ final class AbandonedCartRepository {
         return is_array($rows) ? $rows : [];
     }
 
+    /**
+     * Statistiche per dashboard (con filtro temporale opzionale).
+     *
+     * @param int $days 0 = tutti i dati, altrimenti ultimi X giorni.
+     * @return array{abandoned: int, recovered: int, recovered_value: float}
+     */
     public function get_stats(int $days = 0): array {
         $cutoff = $days > 0 ? gmdate('Y-m-d H:i:s', strtotime("-{$days} days")) : null;
 

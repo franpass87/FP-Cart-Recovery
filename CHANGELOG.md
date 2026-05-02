@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.7] - 2026-05-02
+
+### Fixed
+
+- `AbandonedCartRepository`: PHPDoc di `get_stats()` ripristinato sul metodo corretto (doppio docblock introdotto con `find_active_abandoned`).
+
 ## [1.2.6] - 2026-05-02
 
 ### Added
