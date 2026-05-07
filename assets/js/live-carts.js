@@ -42,9 +42,15 @@
     }
 
     function buildRow(c) {
-        const emailOrUser = c.email
-            ? escapeHtml(c.email)
-            : (c.user_label ? escapeHtml(c.user_label) : '—');
+        let emailOrUser = '—';
+        if (c.email) {
+            emailOrUser = escapeHtml(c.email);
+        } else if (c.user_label) {
+            emailOrUser = escapeHtml(c.user_label);
+        } else if (c.ip_masked) {
+            const prefix = cfg.i18n && cfg.i18n.visitorPrefix ? cfg.i18n.visitorPrefix : 'Visitatore';
+            emailOrUser = escapeHtml(prefix) + ' · ' + escapeHtml(c.ip_masked);
+        }
         const summary = c.item_summary ? escapeHtml(c.item_summary) : '—';
         const total = escapeHtml(c.formatted_total || '');
         const updated = escapeHtml(c.updated_human || '');

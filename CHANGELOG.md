@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.3.0] - 2026-05-07
+
+### Added
+
+- Colonna **`ip_masked`** su `wp_fp_cartrecovery_carts`: salvataggio IP anonimizzato (`wp_privacy_anonymize_ip`) a ogni salvataggio carrello; in **Carrelli attivi** e **Dashboard** i guest senza email mostrano **Visitatore** seguito dall’IP mascherato.
+- Anteprima REST **Sessioni recenti**: per ogni riga, importo riga e tipo prodotto WooCommerce (es. prenotazione) quando disponibili.
+
+### Fixed
+
+- Vista **Carrelli attivi**: colonna **Totale** senza entità HTML letterali (`&nbsp;`, `&euro;`): testo prezzo decodificato lato API prima del rendering JS.
+
 ## [1.2.7] - 2026-05-02
 
 ### Changed

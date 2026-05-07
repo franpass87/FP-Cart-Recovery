@@ -11,7 +11,7 @@ namespace FP\CartRecovery\Core;
  */
 final class Migrations {
 
-    private const DB_VERSION = '2025-03-23';
+    private const DB_VERSION = '2026-05-07';
     private const OPTION_KEY = 'fp_cartrecovery_db_version';
 
     public static function run(): void {
@@ -30,6 +30,7 @@ final class Migrations {
             session_key VARCHAR(100) NOT NULL DEFAULT '',
             user_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
             email VARCHAR(255) NOT NULL DEFAULT '',
+            ip_masked VARCHAR(64) NOT NULL DEFAULT '',
             cart_content LONGTEXT NOT NULL,
             cart_total DECIMAL(12,2) NOT NULL DEFAULT 0.00,
             currency VARCHAR(3) NOT NULL DEFAULT 'EUR',

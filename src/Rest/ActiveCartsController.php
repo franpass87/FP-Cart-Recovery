@@ -52,7 +52,8 @@ final class ActiveCartsController {
         $carts = [];
 
         foreach ($rows as $row) {
-            $summary = $this->summarize_cart_content((string) ($row['cart_content'] ?? ''));
+            $currency = (string) ($row['currency'] ?? 'EUR');
+            $summary = $this->summarize_cart_content((string) ($row['cart_content'] ?? ''), $currency);
             $user_id = (int) ($row['user_id'] ?? 0);
             $user_label = '';
             if ($user_id > 0) {
@@ -67,17 +68,22 @@ final class ActiveCartsController {
                 }
             }
 
-            $currency = (string) ($row['currency'] ?? 'EUR');
             $total = (float) ($row['cart_total'] ?? 0);
             $formatted = function_exists('wc_price')
-                ? wp_strip_all_tags(wc_price($total, ['currency' => $currency]))
+                ? html_entity_decode(
+                    wp_strip_all_tags(wc_price($total, ['currency' => $currency])),
+                    ENT_QUOTES | ENT_HTML5,
+                    'UTF-8'
+                )
                 : (string) $total;
 
             $token = (string) ($row['recovery_token'] ?? '');
+            $ip_masked = (string) ($row['ip_masked'] ?? '');
             $carts[] = [
                 'id'              => (int) ($row['id'] ?? 0),
                 'email'           => (string) ($row['email'] ?? ''),
                 'user_label'      => $user_label,
+                'ip_masked'       => $ip_masked,
                 'cart_total'      => $total,
                 'currency'        => $currency,
                 'formatted_total' => $formatted,
@@ -100,7 +106,7 @@ final class ActiveCartsController {
     /**
      * @return array{lines: int, summary: string}
      */
-    private function summarize_cart_content(string $json): array {
+    private function summarize_cart_content(string $json, string $currency = 'EUR'): array {
         $data = json_decode($json, true);
         if (!is_array($data)) {
             return ['lines' => 0, 'summary' => ''];
@@ -118,7 +124,39 @@ final class ActiveCartsController {
             if ($title_id > 0) {
                 $title = get_the_title($title_id);
                 if ($title !== '') {
-                    $names[] = $title;
+                    $line_total = 0.0;
+                    if (isset($item['line_total'])) {
+                        $line_total = (float) $item['line_total'];
+                    } elseif (isset($item['line_subtotal'])) {
+                        $line_total = (float) $item['line_subtotal'];
+                    }
+                    $price_suffix = '';
+                    if ($line_total > 0 && function_exists('wc_price')) {
+                        $price_suffix = ' · ' . html_entity_decode(
+                            wp_strip_all_tags(wc_price($line_total, ['currency' => $currency])),
+                            ENT_QUOTES | ENT_HTML5,
+                            'UTF-8'
+                        );
+                    }
+
+                    $type_suffix = '';
+                    if (function_exists('wc_get_product')) {
+                        $p = wc_get_product($title_id);
+                        if ($p instanceof \WC_Product) {
+                            $ptype = $p->get_type();
+                            if (!in_array($ptype, ['simple', 'variable', 'variation'], true)) {
+                                $type_suffix = match ($ptype) {
+                                    'booking' => ' · ' . __('Prenotazione', 'fp-cartrecovery'),
+                                    'subscription' => ' · ' . __('Abbonamento', 'fp-cartrecovery'),
+                                    default => $ptype !== ''
+                                        ? ' · ' . $ptype
+                                        : '',
+                                };
+                            }
+                        }
+                    }
+
+                    $names[] = $title . $price_suffix . $type_suffix;
                 }
             }
             if (count($names) >= 4) {

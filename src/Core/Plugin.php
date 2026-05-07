@@ -200,13 +200,14 @@ final class Plugin {
                 'restNonce' => wp_create_nonce('wp_rest'),
                 'pollMs'    => 8000,
                 'i18n'      => [
-                    'empty'       => __('Nessun carrello attivo nella finestra selezionata.', 'fp-cartrecovery'),
-                    'error'       => __('Errore di aggiornamento. Riprova.', 'fp-cartrecovery'),
-                    'lastSync'    => __('Sincronizzato:', 'fp-cartrecovery'),
-                    'lastSyncNow' => __('Aggiornato.', 'fp-cartrecovery'),
-                    'copyLink'    => __('Copia link', 'fp-cartrecovery'),
-                    'sendEmail'   => __('Invia email', 'fp-cartrecovery'),
-                    'delete'      => __('Elimina', 'fp-cartrecovery'),
+                    'empty'          => __('Nessun carrello attivo nella finestra selezionata.', 'fp-cartrecovery'),
+                    'error'          => __('Errore di aggiornamento. Riprova.', 'fp-cartrecovery'),
+                    'lastSync'       => __('Sincronizzato:', 'fp-cartrecovery'),
+                    'lastSyncNow'    => __('Aggiornato.', 'fp-cartrecovery'),
+                    'copyLink'       => __('Copia link', 'fp-cartrecovery'),
+                    'sendEmail'      => __('Invia email', 'fp-cartrecovery'),
+                    'delete'         => __('Elimina', 'fp-cartrecovery'),
+                    'visitorPrefix'  => __('Visitatore', 'fp-cartrecovery'),
                 ],
             ]);
         }

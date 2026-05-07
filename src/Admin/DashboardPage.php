@@ -163,6 +163,14 @@ final class DashboardPage {
                                             } elseif (!empty($row['user_id'])) {
                                                 $user = get_userdata((int) $row['user_id']);
                                                 echo $user ? esc_html($user->display_name . ' (#' . $row['user_id'] . ')') : '—';
+                                            } elseif (!empty($row['ip_masked'])) {
+                                                echo esc_html(
+                                                    sprintf(
+                                                        /* translators: %s: anonymized IP (last octet masked) */
+                                                        __('Visitatore · %s', 'fp-cartrecovery'),
+                                                        (string) $row['ip_masked']
+                                                    )
+                                                );
                                             } else {
                                                 echo '—';
                                             }

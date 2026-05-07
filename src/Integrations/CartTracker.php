@@ -6,6 +6,7 @@ namespace FP\CartRecovery\Integrations;
 
 use FP\CartRecovery\Domain\AbandonedCartRepository;
 use FP\CartRecovery\Domain\Settings;
+use FP\CartRecovery\Utils\IpMask;
 
 /**
  * Traccia i carrelli WooCommerce e li salva come abbandonati.
@@ -88,10 +89,13 @@ final class CartTracker {
 
         $currency = get_woocommerce_currency();
 
+        $ip_masked = IpMask::from_request();
+
         $this->repository->upsert([
             'session_key'   => $session_key,
             'user_id'       => $user_id,
             'email'         => $email,
+            'ip_masked'     => $ip_masked,
             'cart_content'  => wp_json_encode($filtered['content']),
             'cart_total'    => $cart_total,
             'currency'      => $currency,

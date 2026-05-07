@@ -28,6 +28,7 @@ final class AbandonedCartRepository {
         $session_key = sanitize_text_field((string) ($data['session_key'] ?? ''));
         $user_id = absint($data['user_id'] ?? 0);
         $email = sanitize_email((string) ($data['email'] ?? '')) ?: '';
+        $ip_masked = mb_substr(sanitize_text_field((string) ($data['ip_masked'] ?? '')), 0, 64);
         $cart_content = is_string($data['cart_content'] ?? '') ? $data['cart_content'] : wp_json_encode($data['cart_content'] ?? []);
         $cart_total = (float) ($data['cart_total'] ?? 0);
         $currency = sanitize_text_field((string) ($data['currency'] ?? 'EUR'));
@@ -48,10 +49,11 @@ final class AbandonedCartRepository {
                     'cart_total'   => $cart_total,
                     'currency'     => $currency,
                     'email'        => $email ?: $existing['email'],
+                    'ip_masked'    => $ip_masked !== '' ? $ip_masked : (string) ($existing['ip_masked'] ?? ''),
                     'updated_at'   => current_time('mysql'),
                 ],
                 ['id' => $existing['id']],
-                ['%s', '%f', '%s', '%s', '%s'],
+                ['%s', '%f', '%s', '%s', '%s', '%s'],
                 ['%d']
             );
             return (int) $existing['id'];
@@ -67,13 +69,14 @@ final class AbandonedCartRepository {
                 'session_key'   => $session_key,
                 'user_id'       => $user_id,
                 'email'         => $email,
+                'ip_masked'     => $ip_masked,
                 'cart_content'  => $cart_content,
                 'cart_total'    => $cart_total,
                 'currency'      => $currency,
                 'recovery_token'=> $recovery_token,
                 'status'        => $status,
             ],
-            ['%s', '%d', '%s', '%s', '%f', '%s', '%s', '%s']
+            ['%s', '%d', '%s', '%s', '%s', '%f', '%s', '%s', '%s']
         );
 
         return $this->wpdb->insert_id ? (int) $this->wpdb->insert_id : false;
@@ -282,7 +285,7 @@ final class AbandonedCartRepository {
         $cutoff = date('Y-m-d H:i:s', strtotime('-' . $minutes . ' minutes', strtotime(current_time('mysql'))));
 
         $sql = $this->wpdb->prepare(
-            "SELECT id, session_key, user_id, email, cart_content, cart_total, currency, recovery_token, status, reminder_sent, updated_at
+            "SELECT id, session_key, user_id, email, ip_masked, cart_content, cart_total, currency, recovery_token, status, reminder_sent, updated_at
             FROM {$this->table}
             WHERE status = 'abandoned' AND updated_at >= %s
             ORDER BY updated_at DESC
